@@ -17,6 +17,31 @@ export default {
       navigationBarBackgroundColor: '#fff',
       navigationBarTitleText: 'WeChat',
       navigationBarTextStyle: 'black'
+    },
+    tabBar: {
+      color: '#666666',
+      selectedColor: '#000000',
+      borderStyle: 'white',
+      backgroundColor: '#f8f9fb',
+      list: [{
+          text: '首页',
+          pagePath: 'pages/index',
+          iconPath: 'static/images/home.png',
+          selectedIconPath: 'static/images/home-actived.png'
+        },
+        {
+          text: '监控',
+          pagePath: 'pages/index',
+          iconPath: 'static/images/board.png',
+          selectedIconPath: 'static/images/board-actived.png'
+        },
+        {
+          text: '我的',
+          pagePath: 'pages/index',
+          iconPath: 'static/images/profile.png',
+          selectedIconPath: 'static/images/profile-actived.png'
+        }
+      ]
     }
   }
 }
