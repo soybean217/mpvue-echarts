@@ -10,7 +10,7 @@
 	"miniprogramRoot": "./dist/",
 	"compileType": "miniprogram",
 	"appid": "wxbb8e61c5cdaaf8ba",
-	"projectname": "mpvue-echarts-breed",
+	"projectname": "mpvue-echart-example",
 	"condition": {
 		"search": {
 			"current": -1,

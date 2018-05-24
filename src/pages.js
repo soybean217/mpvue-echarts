@@ -4,6 +4,36 @@ module.exports = [{
     navigationBarTitleText: '栏社健康状况'
   }
 }, {
+  path: '/pages/monitors/houseList',
+  config: {
+    navigationBarTitleText: '监控'
+  }
+}, {
+  path: '/pages/monitors/tree',
+  config: {
+    navigationBarTitleText: 'tree'
+  }
+}, {
+  path: '/pages/monitors/login',
+  config: {
+    navigationBarTitleText: 'login'
+  }
+}, {
+  path: '/pages/monitors/roomList',
+  config: {
+    navigationBarTitleText: '三黄肉鸡场'
+  }
+}, {
+  path: '/pages/monitors/roomDetail',
+  config: {
+    navigationBarTitleText: '1号舍'
+  }
+}, {
+  path: '/pages/monitors/warnList',
+  config: {
+    navigationBarTitleText: '异常信息'
+  }
+}, {
   path: '/pages/demos/bar',
   config: {
     navigationBarTitleText: '柱状图'

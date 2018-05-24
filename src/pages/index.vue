@@ -1,12 +1,12 @@
 <template>
   <div class="container">
     <div class="echarts-wrap">
-      <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="demo-canvas" />
+      <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="index-pie" />
     </div>
-    <a class="exception">1<br>环境异常</a>
-    <a class="exception">0<br>设备异常</a>
-    <a class="exception">2<br>断电异常</a>
-    <a class="exception">0<br>其他异常</a>
+    <a href="/pages/monitors/warnList" class="exception">1<br>环境异常</a>
+    <a href="/pages/monitors/warnList" class="exception">0<br>设备异常</a>
+    <a href="/pages/monitors/warnList" class="exception">2<br>断电异常</a>
+    <a href="/pages/monitors/warnList" class="exception">0<br>其他异常</a>
   </div>
 </template>
 <script>
