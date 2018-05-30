@@ -4,9 +4,9 @@ module.exports = [{
     navigationBarTitleText: '栏社健康状况'
   }
 }, {
-  path: '/pages/monitors/houseList',
+  path: '/pages/monitors/farmList',
   config: {
-    navigationBarTitleText: '监控'
+    navigationBarTitleText: '农场列表'
   }
 }, {
   path: '/pages/monitors/tree',
