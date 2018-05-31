@@ -44,8 +44,7 @@ export default {
         let data = await gatewayList({ farmId: farm.id._text })
         if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
           await setStorage(GATEWAY_LIST_FOR_LAST_FARM, {
-            data: { gateways: data.Result.Gateways.Gateway, farm: farm },
-            expires: Date.now() + 60 * 60 * 1000
+            data: { gateways: data.Result.Gateways.Gateway, farm: farm }
           })
           console.log('saved')
           wx.redirectTo({

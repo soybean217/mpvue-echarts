@@ -1,9 +1,9 @@
 <template>
   <div class="container">
-    <div class="wrap" v-for="i in farmInfo.gateways" :key="i" @click="toRoomDetail">
+    <div class="wrap" v-for="gateway in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail">
       <div class="left">
         <img class="imgLeft" src='/static/images/home.png'>
-        <br>{{i._attributes.Name}}</div>
+        <br>{{gateway._attributes.Name}}</div>
       <div class="right">温度：
         <br> 湿度：
         <br> 氨气：
@@ -14,7 +14,9 @@
 </template>
 <script>
 import { getStorage, setStorage } from '@/utils/wechat'
+import { syncGatewaysConfig, gatewayDetail } from '@/utils/api'
 const GATEWAY_LIST_FOR_LAST_FARM = 'GATEWAY_LIST_FOR_LAST_FARM'
+const GATEWAY_CONFIGS = 'GATEWAY_CONFIGS'
 export default {
   data() {
     return {
@@ -33,12 +35,18 @@ export default {
       // })
     },
     async getInitData() {
+      console.log('getInitData')
       let data = await getStorage(GATEWAY_LIST_FOR_LAST_FARM)
+      console.log('getInitData', data)
       wx.setNavigationBarTitle({
         title: data.data.data.farm.name._text
       })
       this.farmInfo = data.data.data
       console.log('getInitData', data)
+      syncGatewaysConfig({ gateways: this.farmInfo.gateways })
+      for (var gateway of this.farmInfo.gateways) {
+        gatewayDetail({ gatewayId: gateway._attributes.Id })
+      }
     },
   },
   mounted() {
