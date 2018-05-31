@@ -1,31 +1,51 @@
 <template>
   <div class="container">
-    <div class="wrap" v-for="i in [1,2,3,4,5]" :key="i" @click="toRoomDetail">
+    <div class="wrap" v-for="i in farmInfo.gateways" :key="i" @click="toRoomDetail">
       <div class="left">
         <img class="imgLeft" src='/static/images/home.png'>
-        <br>{{i}}号舍</div>
-      <div class="right">温度：29
-        <br> 湿度：82.9 RH
-        <br> 氨气：21.0 PPM
-        <br> 地暖：21.4
+        <br>{{i._attributes.Name}}</div>
+      <div class="right">温度：
+        <br> 湿度：
+        <br> 氨气：
+        <br> 地暖：
       </div>
     </div>
   </div>
 </template>
 <script>
+import { getStorage, setStorage } from '@/utils/wechat'
+const GATEWAY_LIST_FOR_LAST_FARM = 'GATEWAY_LIST_FOR_LAST_FARM'
 export default {
+  data() {
+    return {
+      farmInfo: {}
+    }
+  },
   methods: {
     toRoomDetail() {
       console.log('toRoomDetail')
       // TODO: 访问历史的问题
-      wx.switchTab({
-        url: '/pages/monitors/roomDetail'
-      })
+      // wx.switchTab({
+      //   url: '/pages/monitors/roomDetail'
+      // })
       // wx.navigateTo({
       //   url: 'roomDetail'
       // })
     },
+    async getInitData() {
+      let data = await getStorage(GATEWAY_LIST_FOR_LAST_FARM)
+      wx.setNavigationBarTitle({
+        title: data.data.data.farm.name._text
+      })
+      this.farmInfo = data.data.data
+      console.log('getInitData', data)
+    },
   },
+  mounted() {
+    console.log('roomList mounted')
+    this.getInitData()
+    this.toRoomDetail()
+  }
 }
 
 </script>
@@ -37,14 +57,14 @@ export default {
 
 .left {
   align-items: center;
-  width: 30%;
+  width: 40%;
   text-align: center;
   float: left;
   padding: 15px 0;
 }
 
 .right {
-  width: 60%;
+  width: 50%;
   float: left;
   padding: 5px 0;
 }

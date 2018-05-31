@@ -10,9 +10,6 @@
 <script>
 import { getStorage, setStorage } from '@/utils/wechat'
 import { userLogin } from '@/utils/api'
-var parseString = require('xml2js').parseString;
-var convert = require('xml-js');
-var fastXmlParser = require('fast-xml-parser');
 const LAST_SPLASH_DATA = 'LAST_SPLASH_DATA'
 const LAST_SUCCESS_LOGIN_INPUT = 'LAST_SUCCESS_LOGIN_INPUT'
 const LAST_SUCCESS_LOGIN_TICKET = 'LAST_SUCCESS_LOGIN_TICKET'
@@ -62,37 +59,6 @@ export default {
       // let data = await userLogin({ userName: app.username, password: app.password })
       let data = await userLogin()
       console.log('data', data)
-      if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
-
-      }
-      // var result1 = convert.xml2json(data, { compact: true });
-      // console.log('result1', result1)
-      // parseString(data, async function(err, result) {
-      //   console.log('res2', result);
-      //   console.log('res2', result.Result.ReturnFlag[0]);
-      //   console.log('res2', result.Result.ReturnMsg[0]);
-      //   if (result.Result.ReturnFlag[0] == '0' && result.Result.ReturnMsg[0] == "success" && result.Result.Ticket[0]) {
-      //     await setStorage(LAST_SUCCESS_LOGIN_TICKET, {
-      //       data: { ticket: result.Result.Ticket[0] },
-      //       expires: Date.now() + 365 * 24 * 60 * 60 * 1000
-      //     })
-      //     await setStorage(LAST_SUCCESS_LOGIN_INPUT, {
-      //       data: { userName: app.username, password: app.password },
-      //       expires: Date.now() + 365 * 24 * 60 * 60 * 1000
-      //     })
-      //   }
-      // })
-      // let cache = await this.getCache()
-      // if (cache) {
-      //   this.movies = cache.movies
-      //   return
-      // }
-      // let data = await getBoardData({ board: 'coming_soon', page: 1, count: 3 })
-      // this.movies = data.subjects
-      // await setStorage(LAST_SPLASH_DATA, {
-      //   movies: data.subjects,
-      //   expires: Date.now() + 1 * 24 * 60 * 60 * 1000
-      // })
     }
   },
 

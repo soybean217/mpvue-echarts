@@ -21,6 +21,38 @@ export async function farmList() {
   // var formData = new FormData();
   // formData.append('account',userName)
   // formData.append('Password',md5(password))
+  let data = await getFarmList()
+  if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
+    return data
+  } else if (data.Result.ReturnFlag._text == '2' && data.Result.ReturnMsg._text == "ticket overdue") {
+    console.log('ticket overdue')
+    let r = await loginWithCache()
+  }
+  console.log('ticket overdue')
+}
+export async function gatewayList({ farmId = '' } = {}) {
+  // var formData = new FormData();
+  // formData.append('account',userName)
+  // formData.append('Password',md5(password))
+  let data = await getGatewayList(arguments[0])
+  let check = checkResponse(data)
+  if (check == 1) {
+    return data
+  } else if (check == 2) {
+    console.log('ticket overdue')
+    let r = await loginWithCache()
+  }
+}
+
+function checkResponse(data) {
+  if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
+    return 1
+  } else if (data.Result.ReturnFlag._text == '2' && data.Result.ReturnMsg._text == "ticket overdue") {
+    return 2
+  }
+}
+
+async function getFarmList() {
   let ticket = await getStorage(LAST_SUCCESS_LOGIN_TICKET)
   console.log('ticket', ticket)
   let params = {}
@@ -31,10 +63,24 @@ export async function farmList() {
   console.log('farmList', data)
   return data
 }
+async function getGatewayList({ farmId = '' } = {}) {
+  let ticket = await getStorage(LAST_SUCCESS_LOGIN_TICKET)
+  let params = {}
+  console.log('getGatewayList', farmId)
+  params.paramStr = JSON.stringify({ ticket: ticket.data.data.ticket, level: '0', nodeId: farmId })
+  console.log('params', json2Form(params))
+  let result = await (request.post(`/langrh/mobile/mobileGateway!loadGateway.action`, json2Form(params)))
+  let data = JSON.parse(convert.xml2json(result, { compact: true }))
+  console.log('getGatewayList', data)
+  return data
+}
 
 async function loginWithCache() {
+  let result = {}
+  console('loginWithCache')
   let input = await getStorage(LAST_SUCCESS_LOGIN_INPUT)
   console('loginWithCache', input)
+  return result
 }
 
 async function login({ userName = '测试账户', password = '888888' } = {}) {
@@ -59,10 +105,6 @@ async function login({ userName = '测试账户', password = '888888' } = {}) {
 
   }
   return data
-}
-
-function checkResponse(input) {
-
 }
 
 function json2Form(json) {
