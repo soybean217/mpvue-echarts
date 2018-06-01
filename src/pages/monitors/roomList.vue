@@ -1,13 +1,11 @@
 <template>
   <div class="container">
-    <div class="wrap" v-for="gateway in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail">
+    <div class="wrap" v-for="(gateway,i1) in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail">
       <div class="left">
         <img class="imgLeft" src='/static/images/home.png'>
         <br>{{gateway._attributes.Name}}</div>
-      <div class="right">温度：
-        <br> 湿度：
-        <br> 氨气：
-        <br> 地暖：
+      <div class="right">
+        <div v-for="(detail,i2) in gateway.details" :key="i2">{{detail}}</div>
       </div>
     </div>
   </div>
@@ -16,7 +14,8 @@
 import { getStorage, setStorage } from '@/utils/wechat'
 import { syncGatewaysConfig, gatewayDetail } from '@/utils/api'
 const GATEWAY_LIST_FOR_LAST_FARM = 'GATEWAY_LIST_FOR_LAST_FARM'
-const GATEWAY_CONFIGS = 'GATEWAY_CONFIGS'
+const GATEWAY_CONFIG_PREFIX = 'GC_'
+const DETAIL_LIMIT = 4
 export default {
   data() {
     return {
@@ -44,9 +43,32 @@ export default {
       this.farmInfo = data.data.data
       console.log('getInitData', data)
       syncGatewaysConfig({ gateways: this.farmInfo.gateways })
-      for (var gateway of this.farmInfo.gateways) {
-        gatewayDetail({ gatewayId: gateway._attributes.Id })
+      for (let gateway of this.farmInfo.gateways) {
+        var cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + gateway._attributes.Id)
+        let gw = await gatewayDetail({ gatewayId: gateway._attributes.Id })
+        let tmpCount = 0
+        for (let sensor of gw.Result.SensorDatas.Sensor) {
+          if (tmpCount >= DETAIL_LIMIT) {
+            break
+          }
+          if (parseInt(sensor._attributes.Val) > -600) {
+            for (let sensorConfig of cache.Sensors.Sensor) {
+              if (sensorConfig._attributes.Id == sensor._attributes.Id) {
+                if (!gateway.details) {
+                  gateway.details = []
+                }
+                gateway.details.push(sensorConfig._attributes.Name + ':' + sensor._attributes.Val)
+                tmpCount++
+                break
+              }
+            }
+          }
+        }
+        let tmpInfo = this.farmInfo
+        this.farmInfo = {}
+        this.farmInfo = tmpInfo
       }
+      console.log('this.farmInfo', this.farmInfo)
     },
   },
   mounted() {
