@@ -3,15 +3,8 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
-    <a class="monitor">平均温度<br>无数据</a>
-    <a class="monitor">点温差<br>0.0</a>
-    <a class="monitor">温度1<br>无数据</a>
-    <a class="monitor">温度2<br>--</a>
-    <a class="monitor">温度3<br>无数据</a>
-    <a class="monitor">温度4<br>--</a>
-    <a class="monitor">室外温度<br>无数据</a>
-    <a class="monitor">温度1<br>无数据</a>
-    <a class="monitor">温度2<br>--</a>
+    <div class="monitor" v-for="(detail,i1) in details" :key='i1'>{{detail.name}}
+      <br>{{detail.value}}</div>
     <a class="monitor">0<br>设备异常</a>
     <a class="monitor">2<br>断电异常</a>
     <a class="monitor">0<br>其他异常</a>
@@ -20,6 +13,9 @@
 <script>
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
+import { gatewayDetail, detailValueFormat } from '@/utils/api'
+const GATEWAY_CONFIG_PREFIX = 'GC_'
+const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
 let chart = null;
 
@@ -38,7 +34,6 @@ function initChart(canvas, width, height) {
       trigger: 'axis'
     },
     legend: {
-
       data: ['温度1', '温度2', '温度3']
     },
     grid: {
@@ -84,14 +79,51 @@ export default {
   data() {
     return {
       echarts,
-      onInit: initChart
+      onInit: initChart,
+      details: []
     }
+  },
+  methods: {
+    async getInitData() {
+      let gatewayId = wx.getStorageSync(CURRENT_GATEWAY)
+      console.log('getInitData', gatewayId)
+      let cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + '' + gatewayId)
+      console.log('getInitData', cache)
+      wx.setNavigationBarTitle({
+        title: cache._attributes.Name
+      })
+      let gw = await gatewayDetail({ gatewayId: gatewayId })
+      console.log('gw', gw)
+      let details = []
+      for (let sensor of gw.Result.SensorDatas.Sensor) {
+        for (let sensorConfig of cache.Sensors.Sensor) {
+          if (sensorConfig._attributes.Id == sensor._attributes.Id) {
+            details.push({ 'name': sensorConfig._attributes.Name, 'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }) })
+            break
+          }
+        }
+      }
+      for (let item of gw.Result.ControllerDatas.Controller) {
+        for (let config of cache.Controllers.Controller) {
+          if (config._attributes.Id == item._attributes.Id) {
+            details.push({ 'name': config._attributes.Name, 'value': detailValueFormat({ config: config, item: item, catalog: 'controller' }) })
+            break
+          }
+        }
+      }
+      this.details = details
+    },
+  },
+  mounted() {
+    console.log('roomDetail mounted', getCurrentPages())
+    this.getInitData()
   }
 }
 
 </script>
 <style scoped>
 .monitor {
+  float: left;
   width: 25%;
   text-align: center;
   padding: 30px 0;

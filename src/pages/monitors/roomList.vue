@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="wrap" v-for="(gateway,i1) in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail">
+    <div class="wrap" v-for="(gateway,i1) in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail(gateway._attributes.Id)">
       <div class="left">
         <img class="imgLeft" src='/static/images/home.png'>
         <br>{{gateway._attributes.Name}}</div>
@@ -12,9 +12,10 @@
 </template>
 <script>
 import { getStorage, setStorage } from '@/utils/wechat'
-import { syncGatewaysConfig, gatewayDetail } from '@/utils/api'
+import { syncGatewaysConfig, gatewayDetail, redirectToRoomDetail } from '@/utils/api'
 const GATEWAY_LIST_FOR_LAST_FARM = 'GATEWAY_LIST_FOR_LAST_FARM'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
+const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 const DETAIL_LIMIT = 4
 export default {
   data() {
@@ -23,8 +24,9 @@ export default {
     }
   },
   methods: {
-    toRoomDetail() {
+    toRoomDetail(gatewayId) {
       console.log('toRoomDetail')
+      redirectToRoomDetail(gatewayId)
       // TODO: 访问历史的问题
       // wx.switchTab({
       //   url: '/pages/monitors/roomDetail'
@@ -74,7 +76,6 @@ export default {
   mounted() {
     console.log('roomList mounted')
     this.getInitData()
-    this.toRoomDetail()
   }
 }
 

@@ -5,6 +5,7 @@ var convert = require('xml-js');
 const LAST_SUCCESS_LOGIN_INPUT = 'LAST_SUCCESS_LOGIN_INPUT'
 const LAST_SUCCESS_LOGIN_TICKET = 'LAST_SUCCESS_LOGIN_TICKET'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
+const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
 export function userLogin({ userName = '测试账户', password = '888888' } = {}) {
   // var formData = new FormData();
@@ -71,8 +72,108 @@ export async function syncGatewaysConfig({ gateways = [] } = {}) {
     cacheGatewayConfig({ gateway: gateway })
   }
 }
+export function redirectToRoomDetail(gatewayId) {
+  wx.setStorageSync(CURRENT_GATEWAY, gatewayId)
+  wx.redirectTo({
+    url: '/pages/monitors/roomDetail'
+  })
+}
 export async function checkLoginStatus() {
 
+}
+export function detailValueFormat({ config = {}, item = {}, catalog = '' } = {}) {
+  switch (catalog) {
+    case 'controller':
+      return _formatController({ config: config, item: item })
+      break
+    case 'sensor':
+      console.log('sensor')
+      return _formatSensor({ config: config, item: item })
+      break
+    default:
+      return item._attributes.Val
+  }
+  return item._attributes.Val
+}
+
+function _formatSensor({ config = {}, item = {} } = {}) {
+  let val = parseInt(item._attributes.Val)
+  if (val <= -600) {
+    switch (val) {
+      case -999:
+        return '未接入'
+        break
+      case -998:
+        return '未配置'
+        break
+      case -888:
+        return '未录入'
+        break
+      default:
+        return '异常'
+    }
+  } else {
+    switch (config._attributes.Type) {
+      case 'TEMPERATURE':
+        return item._attributes.Val + ' ℃'
+        break
+      case 'HUMIDITY':
+        return item._attributes.Val + ' %'
+        break
+      case 'AMMONIA':
+        return item._attributes.Val + ' ppm'
+        break
+      case 'BRIGHTENESS':
+        return item._attributes.Val + ' lx'
+        break
+      case 'DRINK':
+        return item._attributes.Val + ' kg'
+        break
+      case 'FORAGE':
+        return item._attributes.Val + ' kg'
+        break
+      case 'AMMETER':
+        return item._attributes.Val + ' kw.h'
+        break
+      case 'CO2':
+        return item._attributes.Val + ' ppm'
+        break
+      case 'ANEMOMETER':
+        return item._attributes.Val + ' m/s'
+        break
+      case 'PRESSURE':
+        return item._attributes.Val + ' pa'
+        break
+      default:
+        return item._attributes.Val
+    }
+  }
+
+  return item._attributes.Val
+}
+
+function _formatController({ config = {}, item = {} } = {}) {
+  if (item._attributes.Degree.length > 0) {
+    return item._attributes.Degree
+  } else {
+    switch (item._attributes.Val) {
+      case '0':
+        return '关'
+        break
+      case '1':
+        return '正开'
+        break
+      case '2':
+        return '反开'
+        break
+      case '3':
+        return '错误'
+        break
+      default:
+        return item._attributes.Val
+    }
+  }
+  return item._attributes.Val
 }
 
 
@@ -130,6 +231,7 @@ function checkResponse(data) {
   if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
     return 1
   } else if (data.Result.ReturnFlag._text == '2' && data.Result.ReturnMsg._text == "ticket overdue") {
+    console.log('checkResponse', getCurrentPages())
     return 2
   }
 }

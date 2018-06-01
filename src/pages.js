@@ -21,7 +21,7 @@ module.exports = [{
 }, {
   path: '/pages/monitors/roomList',
   config: {
-    navigationBarTitleText: '三黄肉鸡场'
+    navigationBarTitleText: '栏舍列表'
   }
 }, {
   path: '/pages/monitors/roomDetail',

@@ -1,6 +1,6 @@
 <script>
 export default {
-  created () {
+  created() {
     // 调用API从本地缓存中获取数据
     const logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
@@ -9,16 +9,19 @@ export default {
     console.log('app created and cache logs by setStorageSync')
   }
 }
-</script>
 
+</script>
 <style>
 .container {
   height: 100vh;
   display: flex;
   align-items: center;
+  /*
   justify-content: space-between;
+*/
   padding: 10rpx 0;
   box-sizing: border-box;
   flex-wrap: wrap;
 }
+
 </style>
