@@ -45,6 +45,16 @@ export async function gatewayList({ farmId = '' } = {}) {
     let r = await loginWithCache()
   }
 }
+export async function hourData({ machineId = '' } = {}) {
+  let ticket = getLastSuccessTicket()
+  let params = {}
+  params.ticket = ticket.data.ticket
+  params.machineid = machineId
+  let result = await (request.post(`/langrh/mobile/mobile!hourline.action`, json2Form(params)))
+  let data = JSON.parse(convert.xml2json(result, { compact: true }))
+  console.log('hourData', data)
+  return data
+}
 // export async function gatewayConfig({ gatewayId = '' } = {}) {
 //   let data = await getGatewayConfig(arguments[0])
 //   let check = checkResponse(data)
@@ -74,7 +84,10 @@ export async function syncGatewaysConfig({ gateways = [] } = {}) {
 }
 export function redirectToRoomDetail(gatewayId) {
   wx.setStorageSync(CURRENT_GATEWAY, gatewayId)
-  wx.redirectTo({
+  // wx.redirectTo({
+  //   url: '/pages/monitors/roomDetail'
+  // })
+  wx.navigateTo({
     url: '/pages/monitors/roomDetail'
   })
 }
@@ -87,7 +100,6 @@ export function detailValueFormat({ config = {}, item = {}, catalog = '' } = {})
       return _formatController({ config: config, item: item })
       break
     case 'sensor':
-      console.log('sensor')
       return _formatSensor({ config: config, item: item })
       break
     default:
@@ -144,6 +156,9 @@ function _formatSensor({ config = {}, item = {} } = {}) {
       case 'PRESSURE':
         return item._attributes.Val + ' pa'
         break
+      case 'AIRFLOW':
+        return item._attributes.Val + ' m3/h'
+        break
       default:
         return item._attributes.Val
     }
@@ -153,7 +168,7 @@ function _formatSensor({ config = {}, item = {} } = {}) {
 }
 
 function _formatController({ config = {}, item = {} } = {}) {
-  if (item._attributes.Degree.length > 0) {
+  if (item._attributes.Degree.length > 0 && item._attributes.Degree != '0') {
     return item._attributes.Degree
   } else {
     switch (item._attributes.Val) {

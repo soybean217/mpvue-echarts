@@ -3,21 +3,19 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
-    <div class="monitor" v-for="(detail,i1) in details" :key='i1'>{{detail.name}}
+    <div class="monitor" v-for="(detail,i1) in details" :key='i1' @click='hourDataMachine(detail)'>{{detail.name}}
       <br>{{detail.value}}</div>
-    <a class="monitor">0<br>设备异常</a>
-    <a class="monitor">2<br>断电异常</a>
-    <a class="monitor">0<br>其他异常</a>
   </div>
 </template>
 <script>
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
-import { gatewayDetail, detailValueFormat } from '@/utils/api'
+import { gatewayDetail, detailValueFormat, hourData } from '@/utils/api'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
 let chart = null;
+var option = {}
 
 function initChart(canvas, width, height) {
   chart = echarts.init(canvas, null, {
@@ -26,44 +24,32 @@ function initChart(canvas, width, height) {
   });
   canvas.setChart(chart);
 
-  var option = {
+  option = {
     backgroundColor: '#fff',
     color: ['#37A2DA', '#67E0E3', '#9FE6B8'],
-
     tooltip: {
       trigger: 'axis'
     },
     legend: {
-      data: ['温度1', '温度2', '温度3']
+      data: ['温度']
     },
     grid: {
       containLabel: true
     },
-
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['0:00', '1:00', '2:00', '3:00', '4:00', '5:00', '6:00']
+      data: []
     },
     yAxis: {
       x: 'center',
       type: 'value'
     },
     series: [{
-      name: '温度1',
+      name: '温度',
       type: 'line',
       smooth: true,
-      data: [18, 36, 65, 30, 78, 40, 33]
-    }, {
-      name: '温度2',
-      type: 'line',
-      smooth: true,
-      data: [12, 50, 51, 35, 70, 30, 20]
-    }, {
-      name: '温度3',
-      type: 'line',
-      smooth: true,
-      data: [10, 30, 31, 50, 40, 20, 10]
+      data: []
     }]
   }
 
@@ -84,6 +70,38 @@ export default {
     }
   },
   methods: {
+    async hourDataMachine(machine) {
+      console.log('hourDataMachine machine', machine)
+      let data = await hourData({ machineId: machine.config._attributes.Id })
+      let text = data.Result.Datas._text
+      if (text.indexOf('categories\:') != -1) {
+        text = text.replace('categories', '\"categories\"')
+      }
+      if (text.indexOf('data\:') != -1) {
+        text = text.replace('data', '"data"')
+      }
+      text = text.replace('[00,', '[0,')
+      for (let i = 1; i <= 9; i++) {
+        text = text.replace(',0' + i + ',', ',' + i + ',')
+      }
+      let chartData = JSON.parse(text)
+      console.log('chartData', chartData)
+      option.legend = {
+        data: [machine.name]
+      }
+      option.xAxis = {
+        type: 'category',
+        boundaryGap: false,
+        data: chartData.categories
+      }
+      option.series = [{
+        name: machine.name,
+        type: 'line',
+        smooth: true,
+        data: chartData.data
+      }]
+      chart.setOption(option);
+    },
     async getInitData() {
       let gatewayId = wx.getStorageSync(CURRENT_GATEWAY)
       console.log('getInitData', gatewayId)
@@ -95,19 +113,23 @@ export default {
       let gw = await gatewayDetail({ gatewayId: gatewayId })
       console.log('gw', gw)
       let details = []
-      for (let sensor of gw.Result.SensorDatas.Sensor) {
-        for (let sensorConfig of cache.Sensors.Sensor) {
-          if (sensorConfig._attributes.Id == sensor._attributes.Id) {
-            details.push({ 'name': sensorConfig._attributes.Name, 'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }) })
-            break
+      if (gw.Result.SensorDatas.Sensor) {
+        for (let sensor of gw.Result.SensorDatas.Sensor) {
+          for (let sensorConfig of cache.Sensors.Sensor) {
+            if (sensorConfig._attributes.Id == sensor._attributes.Id) {
+              details.push({ 'name': sensorConfig._attributes.Name, config: sensorConfig, 'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }) })
+              break
+            }
           }
         }
       }
-      for (let item of gw.Result.ControllerDatas.Controller) {
-        for (let config of cache.Controllers.Controller) {
-          if (config._attributes.Id == item._attributes.Id) {
-            details.push({ 'name': config._attributes.Name, 'value': detailValueFormat({ config: config, item: item, catalog: 'controller' }) })
-            break
+      if (gw.Result.ControllerDatas.Controller) {
+        for (var item of gw.Result.ControllerDatas.Controller) {
+          for (let config of cache.Controllers.Controller) {
+            if (config._attributes.Id == item._attributes.Id) {
+              details.push({ 'name': config._attributes.Name, config: config, 'value': detailValueFormat({ config: config, item: item, catalog: 'controller' }) })
+              break
+            }
           }
         }
       }

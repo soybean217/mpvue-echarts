@@ -12,7 +12,7 @@
 </template>
 <script>
 import { getStorage, setStorage } from '@/utils/wechat'
-import { syncGatewaysConfig, gatewayDetail, redirectToRoomDetail } from '@/utils/api'
+import { syncGatewaysConfig, gatewayDetail, redirectToRoomDetail, detailValueFormat } from '@/utils/api'
 const GATEWAY_LIST_FOR_LAST_FARM = 'GATEWAY_LIST_FOR_LAST_FARM'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     toRoomDetail(gatewayId) {
-      console.log('toRoomDetail')
+      console.log('toRoomDetail', gatewayId)
       redirectToRoomDetail(gatewayId)
       // TODO: 访问历史的问题
       // wx.switchTab({
@@ -59,7 +59,7 @@ export default {
                 if (!gateway.details) {
                   gateway.details = []
                 }
-                gateway.details.push(sensorConfig._attributes.Name + ':' + sensor._attributes.Val)
+                gateway.details.push(sensorConfig._attributes.Name + ' : ' + detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }))
                 tmpCount++
                 break
               }
@@ -97,7 +97,7 @@ export default {
 .right {
   width: 50%;
   float: left;
-  padding: 5px 0;
+  padding: 5px 10px;
 }
 
 .wrap {
