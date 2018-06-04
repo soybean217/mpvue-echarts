@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="wrap" v-for="(gateway,i1) in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail(gateway._attributes.Id)">
+    <div class="wrap" v-for="(gateway,i1) in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail(gateway)">
       <div class="left">
         <img class="imgLeft" src='/static/images/home.png'>
         <br>{{gateway._attributes.Name}}</div>
@@ -24,16 +24,11 @@ export default {
     }
   },
   methods: {
-    toRoomDetail(gatewayId) {
-      console.log('toRoomDetail', gatewayId)
-      redirectToRoomDetail(gatewayId)
-      // TODO: 访问历史的问题
-      // wx.switchTab({
-      //   url: '/pages/monitors/roomDetail'
-      // })
-      // wx.navigateTo({
-      //   url: 'roomDetail'
-      // })
+    toRoomDetail(gateway) {
+      if (gateway.details[0] != '设备离线') {
+        console.log('toRoomDetail', gateway._attributes.Id)
+        redirectToRoomDetail(gateway._attributes.Id)
+      }
     },
     async getInitData() {
       console.log('getInitData')
@@ -48,24 +43,30 @@ export default {
       for (let gateway of this.farmInfo.gateways) {
         var cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + gateway._attributes.Id)
         let gw = await gatewayDetail({ gatewayId: gateway._attributes.Id })
-        let tmpCount = 0
-        for (let sensor of gw.Result.SensorDatas.Sensor) {
-          if (tmpCount >= DETAIL_LIMIT) {
-            break
-          }
-          if (parseInt(sensor._attributes.Val) > -600) {
-            for (let sensorConfig of cache.Sensors.Sensor) {
-              if (sensorConfig._attributes.Id == sensor._attributes.Id) {
-                if (!gateway.details) {
-                  gateway.details = []
+        if (gw.Result.OnLine._text == 'Y') {
+          let tmpCount = 0
+          for (let sensor of gw.Result.SensorDatas.Sensor) {
+            if (tmpCount >= DETAIL_LIMIT) {
+              break
+            }
+            if (parseInt(sensor._attributes.Val) > -600) {
+              for (let sensorConfig of cache.Sensors.Sensor) {
+                if (sensorConfig._attributes.Id == sensor._attributes.Id) {
+                  if (!gateway.details) {
+                    gateway.details = []
+                  }
+                  gateway.details.push(sensorConfig._attributes.Name + ' : ' + detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }))
+                  tmpCount++
+                  break
                 }
-                gateway.details.push(sensorConfig._attributes.Name + ' : ' + detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }))
-                tmpCount++
-                break
               }
             }
           }
+        } else {
+          gateway.details = []
+          gateway.details.push('设备离线')
         }
+
         let tmpInfo = this.farmInfo
         this.farmInfo = {}
         this.farmInfo = tmpInfo
