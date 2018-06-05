@@ -55,6 +55,25 @@ export async function hourData({ machineId = '' } = {}) {
   console.log('hourData', data)
   return data
 }
+export async function getAlarmInfo() {
+  let ticket = getLastSuccessTicket()
+  let params = {}
+  params.paramStr = JSON.stringify({ ticket: ticket.data.ticket })
+  let result = await request.post(`/langrh/mobile/mobileGateway!getAlarmRate.action`, json2Form(params))
+  let data = JSON.parse(convert.xml2json(result, { compact: true }))
+  console.log('getAlarmInfo', data)
+  let check = checkResponse(data)
+  return data
+}
+export async function getRemindInfo() {
+  let ticket = getLastSuccessTicket()
+  let params = {}
+  params.paramStr = JSON.stringify({ ticket: ticket.data.ticket })
+  let result = await request.post(`/langrh/mobile/mobileGateway!loadAllYestRemind.action`, json2Form(params))
+  let data = JSON.parse(convert.xml2json(result, { compact: true }))
+  console.log('getRemindInfo', data)
+  return data
+}
 // export async function gatewayConfig({ gatewayId = '' } = {}) {
 //   let data = await getGatewayConfig(arguments[0])
 //   let check = checkResponse(data)
@@ -247,13 +266,13 @@ function checkResponse(data) {
     return 1
   } else if (data.Result.ReturnFlag._text == '2' && data.Result.ReturnMsg._text == "ticket overdue") {
     console.log('checkResponse', getCurrentPages())
+    loginWithCache()
     return 2
   }
 }
 
 async function getFarmList() {
   let ticket = getLastSuccessTicket()
-  console.log('getFarmList')
   let params = {}
   params.paramStr = JSON.stringify({ ticket: ticket.data.ticket })
   let result = await request.post(`/langrh/mobile/mobileFarm!loadFarms.action`, json2Form(params))
@@ -292,9 +311,9 @@ async function loginWithCache() {
     let value = wx.getStorageSync(LAST_SUCCESS_LOGIN_INPUT)
     console.log('loginWithCache', value)
     if (value) {
-      return value
+      login({ userName: value.userName, password: value.password })
     } else {
-      login()
+      wx.redirectTo({ url: '/pages/monitors/login' })
     }
   } catch (e) {
     console.log('loginWithCache catch', e)
@@ -302,14 +321,14 @@ async function loginWithCache() {
   return result
 }
 
-async function login({ userName = '测试账户', password = '888888' } = {}) {
+// { userName = '测试账户', password = '888888' } = {}
+async function login({ userName = '', password = '' } = {}) {
   let params = {}
   params.account = userName
   // params.Password = password
   params.Password = md5(password)
   let result = await request.post(`/langrh/mobile/mobile!login.action`, json2Form(params))
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
-  console.log('login', data)
   if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
     await setStorage(LAST_SUCCESS_LOGIN_TICKET, {
       data: { ticket: data.Result.Ticket._text }
@@ -318,10 +337,20 @@ async function login({ userName = '测试账户', password = '888888' } = {}) {
       userName: userName,
       password: password
     })
-    console.log('saved')
-    return data.Result.Ticket._text
+    let pages = getCurrentPages()
+    console.log('saved successLogin getCurrentPages', getCurrentPages())
+    console.log('saved successLogin getCurrentPages', pages[0])
   } else {
-
+    wx.showModal({
+      title: '登录失败',
+      content: '请重试',
+      showCancel: false,
+      success: function(res) {
+        if (res.confirm) {
+          wx.redirectTo({ url: '/pages/monitors/login' })
+        }
+      }
+    })
   }
   return data
 }

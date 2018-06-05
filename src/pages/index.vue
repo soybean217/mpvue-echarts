@@ -3,17 +3,19 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="index-pie" />
     </div>
-    <a href="/pages/monitors/warnList" class="exception">1<br>环境异常</a>
-    <a href="/pages/monitors/warnList" class="exception">0<br>设备异常</a>
-    <a href="/pages/monitors/warnList" class="exception">2<br>断电异常</a>
-    <a href="/pages/monitors/warnList" class="exception">0<br>其他异常</a>
+    <a href="/pages/monitors/warnList" class="exception">{{remindCount['1']}}<br>栏舍警报</a>
+    <a href="/pages/monitors/warnList" class="exception">{{remindCount['2']}}<br>日常事务</a>
+    <a href="/pages/monitors/warnList" class="exception">{{remindCount['3']}}<br>设备到期</a>
+    <a href="/pages/monitors/warnList" class="exception">{{remindCount['4']}}<br>参数修改</a>
   </div>
 </template>
 <script>
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
+import { getAlarmInfo, getRemindInfo } from '@/utils/api'
 
 let chart = null;
+var option = {}
 
 function initChart(canvas, width, height) {
   chart = echarts.init(canvas, null, {
@@ -22,24 +24,28 @@ function initChart(canvas, width, height) {
   });
   canvas.setChart(chart);
 
-  var option = {
+  option = {
     backgroundColor: '#ffffff',
     color: ['#53ff53', '#ff0000', '#67E0E3', '#91F2DE', '#FFDB5C', '#FF9F7F'],
     series: [{
       label: {
+        show: false,
         normal: {
           fontSize: 14
         }
+      },
+      labelLine: {
+        show: false
       },
       type: 'pie',
       center: ['50%', '50%'],
       radius: [0, '60%'],
       data: [{
         value: 3,
-        name: '正常'
+        name: '正常',
       }, {
         value: 1,
-        name: '异常'
+        name: '异常',
       }],
       itemStyle: {
         emphasis: {
@@ -51,7 +57,7 @@ function initChart(canvas, width, height) {
     }]
   }
 
-  chart.setOption(option);
+  // chart.setOption(option);
 
   return chart; // 返回 chart 后可以自动绑定触摸操作
 }
@@ -63,8 +69,42 @@ export default {
   data() {
     return {
       echarts,
-      onInit: initChart
+      onInit: initChart,
+      remindCount: { "1": 0, "2": 0, "3": 0, "4": 0 },
     }
+  },
+  methods: {
+    async getInitData() {
+      let data = await getAlarmInfo()
+      let normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
+      if (normalNumber > 0) {
+        option.series[0].data = [{
+          value: 100 - normalNumber,
+          name: '正常',
+        }, {
+          value: normalNumber,
+          name: '异常',
+        }]
+      } else {
+        option.series[0].data = [{
+          value: 100,
+          name: '正常',
+        }]
+      }
+      chart.setOption(option);
+      let remindInfo = await getRemindInfo()
+      for (let info of remindInfo.Result.Reminds.Remind) {
+        if (this.remindCount[info.remind_type._text]) {
+          this.remindCount[info.remind_type._text]++
+        } else {
+          this.remindCount[info.remind_type._text] = 1
+        }
+      }
+    },
+  },
+  mounted() {
+    console.log('roomList mounted')
+    this.getInitData()
   }
 }
 
