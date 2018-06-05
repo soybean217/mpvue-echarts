@@ -77,6 +77,7 @@ export default {
   mounted() {
     console.log('roomList mounted')
     this.getInitData()
+    wx.showTabBar()
   }
 }
 

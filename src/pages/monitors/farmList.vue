@@ -47,7 +47,7 @@ export default {
             data: { gateways: data.Result.Gateways.Gateway, farm: farm }
           })
           console.log('saved')
-          wx.redirectTo({
+          wx.navigateTo({
             url: '/pages/monitors/roomList'
           })
         }

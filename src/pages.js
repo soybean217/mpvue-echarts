@@ -1,7 +1,7 @@
 module.exports = [{
   path: '/pages/index',
   config: {
-    navigationBarTitleText: '栏社健康状况'
+    navigationBarTitleText: '栏舍健康状况'
   }
 }, {
   path: '/pages/monitors/farmList',

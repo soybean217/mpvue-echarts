@@ -93,6 +93,10 @@ export default {
       }
       chart.setOption(option);
       let remindInfo = await getRemindInfo()
+      for (let tmp in this.remindCount) {
+        this.remindCount[tmp] = 0
+        console.log('tmp', tmp)
+      }
       for (let info of remindInfo.Result.Reminds.Remind) {
         if (this.remindCount[info.remind_type._text]) {
           this.remindCount[info.remind_type._text]++

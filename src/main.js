@@ -31,7 +31,7 @@ export default {
         },
         {
           text: '监控',
-          pagePath: 'pages/index',
+          pagePath: 'pages/monitors/farmList',
           iconPath: 'static/images/board.png',
           selectedIconPath: 'static/images/board-actived.png'
         },
