@@ -320,9 +320,17 @@ async function login({ userName = '', password = '' } = {}) {
         password: password
       })
 
-      let pages = getCurrentPages()
-      console.log('saved successLogin getCurrentPages', getCurrentPages())
-      console.log('saved successLogin getCurrentPages', pages[0])
+      function asyncConfig(callback) {
+        callback.call()
+      }
+      asyncConfig(function() {
+        console.log('data', data)
+        for (var gateway of data.Result.Gateways.Gateway) {
+          cacheGatewayConfig({ gateway: gateway })
+        }
+        // syncGatewaysConfig({ gateways: this.farmInfo.gateways })
+      })
+      console.log('login success')
       return data
     } else {
       wx.showModal({

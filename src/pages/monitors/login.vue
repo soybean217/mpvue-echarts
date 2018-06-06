@@ -68,7 +68,13 @@ export default {
     }
   },
 
-  mounted() {}
+  mounted() {
+    let cache = wx.getStorageSync(LAST_SUCCESS_LOGIN_INPUT)
+    if (cache) {
+      this.username = cache.userName
+      this.password = cache.password
+    }
+  }
 }
 
 </script>
