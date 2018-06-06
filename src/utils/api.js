@@ -7,16 +7,7 @@ const LAST_SUCCESS_LOGIN_TICKET = 'LAST_SUCCESS_LOGIN_TICKET'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
-export function userLogin({ userName = '测试账户', password = '888888' } = {}) {
-  // var formData = new FormData();
-  // formData.append('account',userName)
-  // formData.append('Password',md5(password))
-  // let params = {}
-  // params.account = userName
-  // // params.Password = password
-  // params.Password = md5(password)
-  // console.log('params', json2Form(params))
-  // return request.post(`/langrh/mobile/mobile!login.action`, json2Form(params))
+export function userLogin({ userName = '', password = '' } = {}) {
   return login({ userName: userName, password: password })
 }
 export async function farmList() {
@@ -24,26 +15,16 @@ export async function farmList() {
   // formData.append('account',userName)
   // formData.append('Password',md5(password))
   let data = await getFarmList()
-  if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
-    return data
-  } else if (data.Result.ReturnFlag._text == '2' && data.Result.ReturnMsg._text == "ticket overdue") {
-    console.log('ticket overdue')
-    let r = await loginWithCache()
-  }
-  console.log('ticket overdue')
+  checkResponse(data)
+  return data
 }
 export async function gatewayList({ farmId = '' } = {}) {
   // var formData = new FormData();
   // formData.append('account',userName)
   // formData.append('Password',md5(password))
   let data = await getGatewayList(arguments[0])
-  let check = checkResponse(data)
-  if (check == 1) {
-    return data
-  } else if (check == 2) {
-    console.log('ticket overdue')
-    let r = await loginWithCache()
-  }
+  checkResponse(data)
+  return data
 }
 export async function hourData({ machineId = '' } = {}) {
   let ticket = getLastSuccessTicket()
@@ -87,17 +68,10 @@ export async function getRemindInfo() {
 export async function gatewayDetail({ gatewayId = '' } = {}) {
   let data = await getGatewayDetail(arguments[0])
   let check = checkResponse(data)
-  if (check == 1) {
-    return data
-  } else if (check == 2) {
-    console.log('ticket overdue')
-    let r = await loginWithCache()
-  }
+  return data
 }
 export async function syncGatewaysConfig({ gateways = [] } = {}) {
-  console.log('syncGatewaysConfig')
   for (var gateway of gateways) {
-    console.log('syncGatewaysConfig', gateway)
     cacheGatewayConfig({ gateway: gateway })
   }
 }
@@ -226,13 +200,14 @@ async function cacheGatewayConfig({ gateway = {} } = {}) {
   try {
     var cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + gateway._attributes.Id)
     if (cache) {
-      console.log('value', cache)
       if (cache._attributes.Version != gateway._attributes.Version) {
         let tmp = await getGatewayConfig({ gatewayId: gateway._attributes.Id })
         return tmp
       } else {
         return cache
       }
+    } else {
+      let tmp = await getGatewayConfig({ gatewayId: gateway._attributes.Id })
     }
   } catch (e) {
     console.log('catch', e)
@@ -311,7 +286,11 @@ async function loginWithCache() {
     let value = wx.getStorageSync(LAST_SUCCESS_LOGIN_INPUT)
     console.log('loginWithCache', value)
     if (value) {
-      login({ userName: value.userName, password: value.password })
+      let data = await login({ userName: value.userName, password: value.password })
+      let pages = getCurrentPages()
+      wx.reLaunch({
+        url: pages[pages.length - 1].route
+      })
     } else {
       wx.redirectTo({ url: '/pages/monitors/login' })
     }
@@ -337,9 +316,11 @@ async function login({ userName = '', password = '' } = {}) {
       userName: userName,
       password: password
     })
+
     let pages = getCurrentPages()
     console.log('saved successLogin getCurrentPages', getCurrentPages())
     console.log('saved successLogin getCurrentPages', pages[0])
+    return data
   } else {
     wx.showModal({
       title: '登录失败',
@@ -352,7 +333,6 @@ async function login({ userName = '', password = '' } = {}) {
       }
     })
   }
-  return data
 }
 
 function json2Form(json) {

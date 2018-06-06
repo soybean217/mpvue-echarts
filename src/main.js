@@ -37,7 +37,7 @@ export default {
         },
         {
           text: '我的',
-          pagePath: 'pages/index',
+          pagePath: 'pages/monitors/profile',
           iconPath: 'static/images/profile.png',
           selectedIconPath: 'static/images/profile-actived.png'
         }

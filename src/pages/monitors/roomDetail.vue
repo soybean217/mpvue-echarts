@@ -73,6 +73,7 @@ export default {
     async hourDataMachine(machine) {
       console.log('hourDataMachine machine', machine)
       let data = await hourData({ machineId: machine.config._attributes.Id })
+      console.log('data', data)
       let text = data.Result.Datas._text
       if (text.indexOf('categories\:') != -1) {
         text = text.replace('categories', '\"categories\"')
@@ -83,7 +84,9 @@ export default {
       text = text.replace('[00,', '[0,')
       for (let i = 1; i <= 9; i++) {
         text = text.replace(',0' + i + ',', ',' + i + ',')
+        text = text.replace(',0' + i + ']', ',' + i + ']')
       }
+      console.log('text', text)
       let chartData = JSON.parse(text)
       console.log('chartData', chartData)
       option.legend = {

@@ -42,6 +42,7 @@ export default {
       syncGatewaysConfig({ gateways: this.farmInfo.gateways })
       for (let gateway of this.farmInfo.gateways) {
         var cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + gateway._attributes.Id)
+        console.log('gateway', cache)
         let gw = await gatewayDetail({ gatewayId: gateway._attributes.Id })
         if (gw.Result.OnLine._text == 'Y') {
           let tmpCount = 0

@@ -56,17 +56,17 @@ export default {
     async login() {
       // let data = await userLogin({ userName: this.username, password:this.password, count: 3 })
       var app = this
-      // let data = await userLogin({ userName: app.username, password: app.password })
-      let data = await userLogin()
-      console.log('data', data)
+      let data = await userLogin({ userName: app.username, password: app.password })
+      // let data = await userLogin()
+      if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
+        wx.switchTab({
+          url: '/pages/index'
+        })
+      }
     }
   },
 
-  mounted() {
-    console.log('mounted')
-    // this.getInitData()
-    this.login()
-  }
+  mounted() {}
 }
 
 </script>

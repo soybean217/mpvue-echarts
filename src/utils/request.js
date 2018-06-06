@@ -4,7 +4,13 @@ import Fly from 'flyio'
 const request = new Fly()
 
 request.config.timeout = 10 * 1000
-request.config.baseURL = 'http://wlwhkq.loongk.com:8080' 
+// request.config.baseURL = 'http://wlwhkq.loongk.com:8080' 
+let cache = wx.getStorageSync('SERVER_HOST')
+if (cache) {
+  request.config.baseURL = cache
+} else {
+  request.config.baseURL = 'http://wlwhkq.loongk.com:8080'
+}
 
 request.interceptors.request.use((request) => {
   wx.showLoading({ title: '联网中...' })
