@@ -289,7 +289,7 @@ async function loginWithCache() {
       let data = await login({ userName: value.userName, password: value.password })
       let pages = getCurrentPages()
       wx.reLaunch({
-        url: pages[pages.length - 1].route
+        url: '/' + pages[pages.length - 1].route
       })
     } else {
       wx.redirectTo({ url: '/pages/monitors/login' })
@@ -306,32 +306,36 @@ async function login({ userName = '', password = '' } = {}) {
   params.account = userName
   // params.Password = password
   params.Password = md5(password)
-  let result = await request.post(`/langrh/mobile/mobile!login.action`, json2Form(params))
-  let data = JSON.parse(convert.xml2json(result, { compact: true }))
-  if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
-    await setStorage(LAST_SUCCESS_LOGIN_TICKET, {
-      data: { ticket: data.Result.Ticket._text }
-    })
-    await setStorage(LAST_SUCCESS_LOGIN_INPUT, {
-      userName: userName,
-      password: password
-    })
+  try {
+    let result = await request.post(`/langrh/mobile/mobile!login.action`, json2Form(params))
+    let data = JSON.parse(convert.xml2json(result, { compact: true }))
+    if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
+      await setStorage(LAST_SUCCESS_LOGIN_TICKET, {
+        data: { ticket: data.Result.Ticket._text }
+      })
+      await setStorage(LAST_SUCCESS_LOGIN_INPUT, {
+        userName: userName,
+        password: password
+      })
 
-    let pages = getCurrentPages()
-    console.log('saved successLogin getCurrentPages', getCurrentPages())
-    console.log('saved successLogin getCurrentPages', pages[0])
-    return data
-  } else {
-    wx.showModal({
-      title: '登录失败',
-      content: '请重试',
-      showCancel: false,
-      success: function(res) {
-        if (res.confirm) {
-          wx.redirectTo({ url: '/pages/monitors/login' })
+      let pages = getCurrentPages()
+      console.log('saved successLogin getCurrentPages', getCurrentPages())
+      console.log('saved successLogin getCurrentPages', pages[0])
+      return data
+    } else {
+      wx.showModal({
+        title: '登录失败',
+        content: '请重试',
+        showCancel: false,
+        success: function(res) {
+          if (res.confirm) {
+            wx.redirectTo({ url: '/pages/monitors/login' })
+          }
         }
-      }
-    })
+      })
+    }
+  } catch (e) {
+    console.log('catch', e)
   }
 }
 

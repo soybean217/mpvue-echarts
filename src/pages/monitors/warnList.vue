@@ -10,8 +10,9 @@
     </div> -->
     <div class="wrap" v-for="i in remindInfo" :key="i" @click='redirectToRoomDetail(i.basic_gateway_id._text)'>
       <div>
-        {{i.typeName}} {{i.contentInfo.alarmTime}} </div>
-      <div>{{i.gatewayName._text}} {{i.contentInfo.alarmMsg}}
+        <span class="fontBig">{{i.typeName}}</span> <span class="fontTime">{{i.contentInfo.alarmTime}}</span> </div>
+      <div class="divRoom">
+        <span class="fontRoom">{{i.gatewayName._text}}</span> <span class="fontMsg">{{i.contentInfo.alarmMsg}}</span>
       </div>
     </div>
   </div>
@@ -79,7 +80,32 @@ export default {
 
 .wrap {
   width: 100%;
-  padding-left: 20px;
+  padding: 20px;
+  border-bottom: 1px solid #bebebe;
+}
+
+.divRoom {
+  width: 100%;
+  padding: 10px;
+}
+
+.fontBig {
+  padding: 10px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.fontRoom {
+  padding: 10px;
+  font-size: 20px;
+}
+
+.fontMsg {
+  font-size: 16px;
+}
+
+.fontTime {
+  font-size: 12px;
 }
 
 </style>

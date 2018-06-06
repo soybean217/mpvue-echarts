@@ -9,6 +9,7 @@
 <script>
 import { getStorage, setStorage } from '@/utils/wechat'
 import { userLogin } from '@/utils/api'
+import request from '@/utils/request'
 const LAST_SPLASH_DATA = 'LAST_SPLASH_DATA'
 const LAST_SUCCESS_LOGIN_INPUT = 'LAST_SUCCESS_LOGIN_INPUT'
 const LAST_SUCCESS_LOGIN_TICKET = 'LAST_SUCCESS_LOGIN_TICKET'
@@ -24,7 +25,8 @@ export default {
 
   methods: {
     modifyServer() {
-      wx.getStorageSync('SERVER_HOST', this.serverHost)
+      wx.setStorageSync('SERVER_HOST', this.serverHost)
+      request.initConfig()
       wx.showModal({
         title: '服务器地址',
         content: '已修改',

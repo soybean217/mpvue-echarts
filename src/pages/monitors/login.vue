@@ -5,6 +5,8 @@
       <input type="password" class="form-control" v-model="password" placeholder="密码" />
     </form>
     <span @click="login" class="counter">登录</span>
+    <br>
+    <a href='/pages/monitors/serverEdit' class="counter">修改服务器地址</a>
   </div>
 </template>
 <script>
