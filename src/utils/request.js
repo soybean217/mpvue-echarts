@@ -9,7 +9,6 @@ request.config.timeout = 10 * 1000
 
 request.initConfig = function() {
   let cache = wx.getStorageSync('SERVER_HOST')
-  console.log('initConfig', cache)
   if (cache) {
     request.config.baseURL = cache
   } else {

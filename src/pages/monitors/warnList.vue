@@ -8,11 +8,12 @@
       <div class="stat">总时长
         <br>21：20</div>
     </div> -->
-    <div class="wrap" v-for="i in remindInfo" :key="i" @click='redirectToRoomDetail(i.basic_gateway_id._text)'>
+    <div class="wrap" v-for="(i,i1) in remindInfo" :key="i" @click='redirectToRoomDetail(i.basic_gateway_id._text)'>
       <div>
-        <span class="fontBig">{{i.typeName}}</span> <span class="fontTime">{{i.contentInfo.alarmTime}}</span> </div>
+        <span class="fontBig">{{i.typeName}}</span> <span class="fontTime">{{i.contentInfo.alarmTime}}{{i.contentInfo.editTime}}</span> </div>
       <div class="divRoom">
-        <span class="fontRoom">{{i.gatewayName._text}}</span> <span class="fontMsg">{{i.contentInfo.alarmMsg}}</span>
+        <span class="fontRoom">栏舍：{{i.gatewayName._text}}</span>
+        <div v-for="(item,i2) in i.displayContents" :key="item" class="fontMsg">{{item}}</div>
       </div>
     </div>
   </div>
@@ -32,31 +33,34 @@ export default {
     async getInitData() {
       let remindInfo = await getRemindInfo()
       for (let info of remindInfo.Result.Reminds.Remind) {
-        console.log('info.content._text', this.typeName(info.remind_type._text), info.content._text)
-        if (Array.isArray(info.content._text)) {
+        info.content._cdata = info.content._cdata.replace(new RegExp("'", "gm"), '"')
+        if (Array.isArray(info.content._cdata)) {
           info.contentInfo = {}
-          info.contentInfo.alarmMsg = info.content._text.join()
+          info.contentInfo.alarmMsg = info.content._cdata.join()
         } else {
-          info.contentInfo = JSON.parse(info.content._text)
+          info.contentInfo = JSON.parse(info.content._cdata)
         }
-        info.typeName = this.typeName(info.remind_type._text)
+        this.typeName(info)
       }
       this.remindInfo = remindInfo.Result.Reminds.Remind
-      console.log('getInitData end')
     },
-    typeName(typeId) {
-      switch (typeId) {
+    typeName(info) {
+      switch (info.remind_type._text) {
         case '1':
-          return '栏舍警报'
+          info.displayContents = []
+          info.displayContents.push(info.contentInfo.alarmMsg)
+          info.typeName = '栏舍警报'
           break
         case '2':
-          return '日常事务'
+          info.displayContents = info.contentInfo.remindMsg.split(/<br\/>/)
+          info.typeName = '日常事务'
           break
         case '3':
           return '设备到期'
           break
         case '4':
-          return '参数修改'
+          info.displayContents = info.contentInfo.editContent.split(/<br\/>/)
+          info.typeName = '参数修改'
           break
         default:
           return '未定义'

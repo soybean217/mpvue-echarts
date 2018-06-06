@@ -51,6 +51,8 @@ export async function getRemindInfo() {
   let params = {}
   params.paramStr = JSON.stringify({ ticket: ticket.data.ticket })
   let result = await request.post(`/langrh/mobile/mobileGateway!loadAllYestRemind.action`, json2Form(params))
+  // result = result.replace(/<br\s*[\/]?>/gi, "")
+  // console.log('getRemindInfo', result)
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
   console.log('getRemindInfo', data)
   return data

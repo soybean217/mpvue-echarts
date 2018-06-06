@@ -3,8 +3,8 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
-    <div class="monitor" v-for="(detail,i1) in details" :key='i1' @click='hourDataMachine(detail)'>{{detail.name}}
-      <br>{{detail.value}}</div>
+    <div class="monitor" v-for="(detail,i1) in details" :key='i1' @click='hourDataMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
+      <br><span class="dataValue">{{detail.value}}</span></div>
   </div>
 </template>
 <script>
@@ -31,6 +31,8 @@ function initChart(canvas, width, height) {
       trigger: 'axis'
     },
     legend: {
+      top: 'bottom',
+      // bottom: '10%',
       data: ['温度']
     },
     grid: {
@@ -163,6 +165,15 @@ export default {
 .echarts-wrap {
   width: 100%;
   height: 300px;
+}
+
+.dataTitle {
+  font-size: 16px;
+  color: #6fb7b7;
+}
+
+.dataValue {
+  font-weight: bold;
 }
 
 </style>

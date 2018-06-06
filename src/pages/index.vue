@@ -25,7 +25,7 @@ function initChart(canvas, width, height) {
   canvas.setChart(chart);
 
   option = {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#84c1ff',
     color: ['#53ff53', '#ff0000', '#67E0E3', '#91F2DE', '#FFDB5C', '#FF9F7F'],
     series: [{
       label: {

@@ -31,7 +31,7 @@ module.exports = [{
 }, {
   path: '/pages/monitors/roomDetail',
   config: {
-    navigationBarTitleText: '1号舍'
+    navigationBarTitleText: '栏舍详情'
   }
 }, {
   path: '/pages/monitors/warnList',
