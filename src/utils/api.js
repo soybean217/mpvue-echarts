@@ -26,6 +26,25 @@ export async function gatewayList({ farmId = '' } = {}) {
   checkResponse(data)
   return data
 }
+export function getWarnTypeNameById(typeId) {
+  switch (typeId) {
+    case '1':
+      return '栏舍警报'
+      break
+    case '2':
+      return '日常事务'
+      break
+    case '3':
+      return '设备到期'
+      break
+    case '4':
+      return '参数修改'
+      break
+    default:
+      return '未定义'
+  }
+}
+
 export async function hourData({ machineId = '' } = {}) {
   let ticket = getLastSuccessTicket()
   let params = {}
@@ -55,6 +74,7 @@ export async function getRemindInfo() {
   // console.log('getRemindInfo', result)
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
   console.log('getRemindInfo', data)
+  checkResponse(data)
   return data
 }
 // export async function gatewayConfig({ gatewayId = '' } = {}) {

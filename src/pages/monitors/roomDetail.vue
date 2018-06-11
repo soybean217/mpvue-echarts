@@ -22,8 +22,8 @@ function initChart(canvas, width, height) {
     width: width,
     height: height
   });
-  chart.on("click", function(params) {
-    console.log('params', params)
+  chart.on("mousedown", function(params) {
+    console.log('mousedown', params)
   });
   canvas.setChart(chart);
 
@@ -84,9 +84,9 @@ export default {
   },
   methods: {
     async hourDataMachine(machine) {
-      console.log('hourDataMachine machine', machine)
+      // console.log('hourDataMachine machine', machine)
       let data = await hourData({ machineId: machine.config._attributes.Id })
-      console.log('data', data)
+      // console.log('data', data)
       let text = data.Result.Datas._text
       if (text.indexOf('categories\:') != -1) {
         text = text.replace('categories', '\"categories\"')
@@ -99,9 +99,9 @@ export default {
         text = text.replace(',0' + i + ',', ',' + i + ',')
         text = text.replace(',0' + i + ']', ',' + i + ']')
       }
-      console.log('text', text)
+      // console.log('text', text)
       let chartData = JSON.parse(text)
-      console.log('chartData', chartData)
+      // console.log('chartData', chartData)
       option.legend = {
         data: [machine.name]
       }
@@ -117,21 +117,12 @@ export default {
         data: chartData.data
       }]
       chart.setOption(option);
-      chart.on("click", function(params) {
-        console.log('params')
-      });
-      chart.on("mousedown", function(params) {
-        console.log('mousedown', params)
-      });
-      chart.on("mouseup", function(params) {
-        console.log('mouseup', params)
-      });
     },
     async getInitData() {
       let gatewayId = wx.getStorageSync(CURRENT_GATEWAY)
-      console.log('getInitData', gatewayId)
+      // console.log('getInitData', gatewayId)
       let cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + '' + gatewayId)
-      console.log('getInitData', cache)
+      // console.log('getInitData', cache)
       wx.setNavigationBarTitle({
         title: cache._attributes.Name
       })

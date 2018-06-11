@@ -10,16 +10,16 @@
     </div> -->
     <div class="wrap" v-for="(i,i1) in remindInfo" :key="i" @click='redirectToRoomDetail(i.basic_gateway_id._text)'>
       <div>
-        <span class="fontBig">{{i.typeName}}</span> <span class="fontTime">{{i.contentInfo.alarmTime}}{{i.contentInfo.editTime}}</span> </div>
+        <span class="fontBig">{{i.gatewayName._text}}</span> <span class="fontTime">{{i.contentInfo.alarmTime}}{{i.contentInfo.editTime}}</span> </div>
       <div class="divRoom">
-        <span class="fontRoom">栏舍：{{i.gatewayName._text}}</span>
+        <span class="fontRoom"></span>
         <div v-for="(item,i2) in i.displayContents" :key="item" class="fontMsg">{{item}}</div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { getRemindInfo, redirectToRoomDetail } from '@/utils/api'
+import { getRemindInfo, redirectToRoomDetail, getWarnTypeNameById } from '@/utils/api'
 export default {
   data() {
     return {
@@ -31,18 +31,32 @@ export default {
       redirectToRoomDetail(gatewayId)
     },
     async getInitData() {
+      console.log('(this.$root.$mp.query.type', this.$root.$mp.query.type)
+      wx.setNavigationBarTitle({
+        title: getWarnTypeNameById(this.$root.$mp.query.type)
+      })
       let remindInfo = await getRemindInfo()
-      for (let info of remindInfo.Result.Reminds.Remind) {
-        info.content._cdata = info.content._cdata.replace(new RegExp("'", "gm"), '"')
-        if (Array.isArray(info.content._cdata)) {
-          info.contentInfo = {}
-          info.contentInfo.alarmMsg = info.content._cdata.join()
-        } else {
-          info.contentInfo = JSON.parse(info.content._cdata)
-        }
-        this.typeName(info)
+      if (!Array.isArray(remindInfo.Result.Reminds.Remind)) {
+        let tmpInfo = remindInfo.Result.Reminds.Remind
+        remindInfo.Result.Reminds.Remind = []
+        remindInfo.Result.Reminds.Remind.push(tmpInfo)
       }
-      this.remindInfo = remindInfo.Result.Reminds.Remind
+      let tmpReminds = []
+      for (let info of remindInfo.Result.Reminds.Remind) {
+        if (info.remind_type._text == this.$root.$mp.query.type) {
+          info.content._cdata = info.content._cdata.replace(new RegExp("'", "gm"), '"')
+          if (Array.isArray(info.content._cdata)) {
+            info.contentInfo = {}
+            info.contentInfo.alarmMsg = info.content._cdata.join()
+          } else {
+            info.contentInfo = JSON.parse(info.content._cdata)
+          }
+          this.typeName(info)
+          tmpReminds.push(info)
+        }
+      }
+      this.remindInfo = tmpReminds
+      console.log('tmpReminds', tmpReminds)
     },
     typeName(info) {
       switch (info.remind_type._text) {
@@ -56,6 +70,9 @@ export default {
           info.typeName = '日常事务'
           break
         case '3':
+          info.displayContents = []
+          info.displayContents.push('设备名称：' + info.contentInfo.machineName)
+          info.displayContents.push('到期时间：' + info.contentInfo.expiredTime)
           return '设备到期'
           break
         case '4':
@@ -68,6 +85,7 @@ export default {
     }
   },
   mounted() {
+    console.log('this.$root.$mp.query', this.$root.$mp.query)
     this.getInitData()
   }
 }

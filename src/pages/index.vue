@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-    <div class="echarts-wrap" @click='clickPie'>
+    <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="index-pie" />
     </div>
-    <a href="/pages/monitors/warnList" class="exception">栏舍警报<br><span class="boldNumber">{{remindCount['1']}}</span></a>
-    <a href="/pages/monitors/warnList" class="exception">日常事务<br><span class="boldNumber">{{remindCount['2']}}</span></a>
-    <a href="/pages/monitors/warnList" class="exception">设备到期<br><span class="boldNumber">{{remindCount['3']}}</span></a>
-    <a href="/pages/monitors/warnList" class="exception">参数修改<br><span class="boldNumber">{{remindCount['4']}}</span></a>
+    <a href="/pages/monitors/warnList?type=1" class="exception">昨日警报<br><span class="boldNumber">{{remindCount['1']}}</span></a>
+    <a href="/pages/monitors/warnList?type=2" class="exception">日常事务<br><span class="boldNumber">{{remindCount['2']}}</span></a>
+    <a href="/pages/monitors/warnList?type=3" class="exception">设备到期<br><span class="boldNumber">{{remindCount['3']}}</span></a>
+    <a href="/pages/monitors/warnList?type=4" class="exception">参数修改<br><span class="boldNumber">{{remindCount['4']}}</span></a>
   </div>
 </template>
 <script>
@@ -59,7 +59,12 @@ function initChart(canvas, width, height) {
       }
     }]
   }
-
+  chart.on("mousedown", function(params) {
+    console.log('mousedown', params)
+  });
+  chart.on("pieselected", function(params) {
+    console.log('pieselected', params)
+  });
 
   // chart.setOption(option);
 
@@ -84,7 +89,6 @@ export default {
     },
     async getInitData() {
       let remindInfo = await getRemindInfo()
-      console.log('remindInfo', remindInfo)
       for (let tmp in this.remindCount) {
         this.remindCount[tmp] = 0
       }
@@ -118,15 +122,6 @@ export default {
         }]
       }
       chart.setOption(option);
-      chart.on("click", function(params) {
-        console.log('params', params)
-        if (params.value) {
-          console.log("单击了" + params.name + "柱状图");
-        } else {
-          console.log("单击了" + params.name + "x轴标签");
-        }
-      });
-
     },
   },
   mounted() {
