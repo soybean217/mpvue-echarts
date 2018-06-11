@@ -16,6 +16,7 @@ export default {
   height: 100vh;
   display: flex;
   align-items: center;
+  background-color: #f8f9fb;
   /*
   justify-content: space-between;
 */

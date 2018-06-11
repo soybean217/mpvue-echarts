@@ -61,7 +61,7 @@ export default {
       let data = await userLogin({ userName: app.username, password: app.password })
       // let data = await userLogin()
       if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
-        wx.switchTab({
+        wx.reLaunch({
           url: '/pages/index'
         })
       }

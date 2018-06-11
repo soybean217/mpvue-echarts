@@ -14,7 +14,7 @@ import { gatewayDetail, detailValueFormat, hourData } from '@/utils/api'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
-let chart = null;
+var chart = null;
 var option = {}
 
 function initChart(canvas, width, height) {
@@ -22,14 +22,17 @@ function initChart(canvas, width, height) {
     width: width,
     height: height
   });
+  chart.on("click", function(params) {
+    console.log('params', params)
+  });
   canvas.setChart(chart);
 
   option = {
     backgroundColor: '#fff',
     color: ['#37A2DA', '#67E0E3', '#9FE6B8'],
-    tooltip: {
-      trigger: 'axis'
-    },
+    // tooltip: {
+    //   trigger: 'axis'
+    // },
     legend: {
       top: 'bottom',
       // bottom: '10%',
@@ -41,7 +44,14 @@ function initChart(canvas, width, height) {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: []
+      data: [],
+      // axisPointer: {
+      //   label: {
+      //     formatter: function(params) {
+      //       console.log('params', params)
+      //     }
+      //   }
+      // },
     },
     yAxis: {
       x: 'center',
@@ -50,6 +60,7 @@ function initChart(canvas, width, height) {
     series: [{
       name: '温度',
       type: 'line',
+      symbolSize: 16,
       smooth: true,
       data: []
     }]
@@ -106,6 +117,15 @@ export default {
         data: chartData.data
       }]
       chart.setOption(option);
+      chart.on("click", function(params) {
+        console.log('params')
+      });
+      chart.on("mousedown", function(params) {
+        console.log('mousedown', params)
+      });
+      chart.on("mouseup", function(params) {
+        console.log('mouseup', params)
+      });
     },
     async getInitData() {
       let gatewayId = wx.getStorageSync(CURRENT_GATEWAY)

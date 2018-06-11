@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-    <div class="echarts-wrap">
+    <div class="echarts-wrap" @click='clickPie'>
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="index-pie" />
     </div>
-    <a href="/pages/monitors/warnList" class="exception">{{remindCount['1']}}<br>栏舍警报</a>
-    <a href="/pages/monitors/warnList" class="exception">{{remindCount['2']}}<br>日常事务</a>
-    <a href="/pages/monitors/warnList" class="exception">{{remindCount['3']}}<br>设备到期</a>
-    <a href="/pages/monitors/warnList" class="exception">{{remindCount['4']}}<br>参数修改</a>
+    <a href="/pages/monitors/warnList" class="exception">栏舍警报<br><span class="boldNumber">{{remindCount['1']}}</span></a>
+    <a href="/pages/monitors/warnList" class="exception">日常事务<br><span class="boldNumber">{{remindCount['2']}}</span></a>
+    <a href="/pages/monitors/warnList" class="exception">设备到期<br><span class="boldNumber">{{remindCount['3']}}</span></a>
+    <a href="/pages/monitors/warnList" class="exception">参数修改<br><span class="boldNumber">{{remindCount['4']}}</span></a>
   </div>
 </template>
 <script>
@@ -22,11 +22,14 @@ function initChart(canvas, width, height) {
     width: width,
     height: height
   });
+  chart.on("click", function(params) {
+    console.log('params', params)
+  });
   canvas.setChart(chart);
 
   option = {
     backgroundColor: '#84c1ff',
-    color: ['#53ff53', '#ff0000', '#67E0E3', '#91F2DE', '#FFDB5C', '#FF9F7F'],
+    color: ['#7CCD7C', '#ff0000', '#67E0E3', '#91F2DE', '#FFDB5C', '#FF9F7F'],
     series: [{
       label: {
         show: false,
@@ -57,10 +60,12 @@ function initChart(canvas, width, height) {
     }]
   }
 
+
   // chart.setOption(option);
 
   return chart; // 返回 chart 后可以自动绑定触摸操作
 }
+
 
 export default {
   components: {
@@ -74,27 +79,19 @@ export default {
     }
   },
   methods: {
+    clickPie() {
+      console.log('clickPie')
+    },
     async getInitData() {
-      let data = await getAlarmInfo()
-      let normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
-      if (normalNumber > 0) {
-        option.series[0].data = [{
-          value: 100 - normalNumber,
-          name: '正常',
-        }, {
-          value: normalNumber,
-          name: '异常',
-        }]
-      } else {
-        option.series[0].data = [{
-          value: 100,
-          name: '正常',
-        }]
-      }
-      chart.setOption(option);
       let remindInfo = await getRemindInfo()
+      console.log('remindInfo', remindInfo)
       for (let tmp in this.remindCount) {
         this.remindCount[tmp] = 0
+      }
+      if (!Array.isArray(remindInfo.Result.Reminds.Remind)) {
+        let tmpInfo = remindInfo.Result.Reminds.Remind
+        remindInfo.Result.Reminds.Remind = []
+        remindInfo.Result.Reminds.Remind.push(tmpInfo)
       }
       for (let info of remindInfo.Result.Reminds.Remind) {
         if (this.remindCount[info.remind_type._text]) {
@@ -103,6 +100,33 @@ export default {
           this.remindCount[info.remind_type._text] = 1
         }
       }
+
+      let data = await getAlarmInfo()
+      let normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
+      if (normalNumber > 0) {
+        option.series[0].data = [{
+          value: 100 - normalNumber,
+          name: '正常栏舍',
+        }, {
+          value: normalNumber,
+          name: '异常栏舍',
+        }]
+      } else {
+        option.series[0].data = [{
+          value: 100,
+          name: '正常栏舍',
+        }]
+      }
+      chart.setOption(option);
+      chart.on("click", function(params) {
+        console.log('params', params)
+        if (params.value) {
+          console.log("单击了" + params.name + "柱状图");
+        } else {
+          console.log("单击了" + params.name + "x轴标签");
+        }
+      });
+
     },
   },
   mounted() {
@@ -114,15 +138,18 @@ export default {
 </script>
 <style scoped>
 .exception {
-  width: 50%;
+  width: 49%;
   text-align: center;
-  padding: 30px 0;
+  padding: 20px 0;
+  background-color: #DBDBDB;
+  border: 1px solid #f8f9fb;
 }
 
-.link {
-  width: 50%;
-  text-align: center;
-  padding: 10px 0;
+.boldNumber {
+  font-color: #6E8B3D;
+  color: #6E8B3D;
+  font-size: 30px;
+  font-weight: bold;
 }
 
 .echarts-wrap {
