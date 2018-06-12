@@ -27,4 +27,8 @@ export default {
   flex-wrap: wrap;
 }
 
+body {
+  background-color: #f8f9fb;
+}
+
 </style>

@@ -208,14 +208,14 @@ function _formatController({ config = {}, item = {} } = {}) {
 
 
 async function getGatewayDetail({ gatewayId = '' } = {}) {
-  console.log('getGatewayDetail', gatewayId)
+  // console.log('getGatewayDetail', gatewayId)
   let ticket = getLastSuccessTicket()
   let params = {}
   params.ticket = ticket.data.ticket
   params.gatewayid = gatewayId
   let result = await (request.post(`/langrh/mobile/mobile!getShackStatusAndDatas.action`, json2Form(params)))
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
-  console.log('getGatewayDetail', data)
+  // console.log('getGatewayDetail', data)
   return data
 }
 async function cacheGatewayConfig({ gateway = {} } = {}) {
@@ -272,7 +272,8 @@ async function getFarmList() {
   let ticket = getLastSuccessTicket()
   let params = {}
   params.paramStr = JSON.stringify({ ticket: ticket.data.ticket })
-  let result = await request.post(`/langrh/mobile/mobileFarm!loadFarms.action`, json2Form(params))
+  // let result = await request.post(`/langrh/mobile/mobileFarm!loadFarms.action`, json2Form(params))
+  let result = await request.post(`/langrh/mobile/mobileFarm!loadFarms4Level.action`, json2Form(params))
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
   console.log('farmList', data)
   return data
@@ -281,7 +282,7 @@ async function getGatewayList({ farmId = '' } = {}) {
   let ticket = getLastSuccessTicket()
   let params = {}
   console.log('getGatewayList', farmId)
-  params.paramStr = JSON.stringify({ ticket: ticket.data.ticket, level: '0', nodeId: farmId })
+  params.paramStr = JSON.stringify({ ticket: ticket.data.ticket, level: '3', nodeId: farmId })
   let result = await (request.post(`/langrh/mobile/mobileGateway!loadGateway.action`, json2Form(params)))
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
   console.log('getGatewayList', data)

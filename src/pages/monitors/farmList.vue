@@ -2,15 +2,17 @@
   <div class="container">
     <div class="list" v-for="(f0,i0)  in parentLeave" :key='f0.id._text'>
       <div @click='chooseFarm(f0)'>
+        <span class="symbol" v-if="f0.hasChild"><span v-if="f0.childShow">-</span><span v-else>+</span>&nbsp;</span>
         {{f0.name._text}}
-        <span v-if="f0.hasChild"><span v-if="f0.childShow">-</span><span v-else>+</span></span>
       </div>
-      <div v-if="f0.childShow" class="list " v-for="(f1,i1) in childMapList[f0.id._text] " :key='f1.id._text'>
-        <div @click='chooseFarm(f1)'>{{f1.name._text}}</div>
-        <span v-if="f1.hasChild"><span v-if="f1.childShow">-</span><span v-else>+</span></span>
-        <div v-if="f1.childShow" class="list " v-for="f2 in childMapList[f1.id._text] " :key='f2.id._text'>
-          <div @click='chooseFarm(f2)'>{{f2.name._text}}</div>
-          <span v-if="f2.hasChild"><span v-if="f2.childShow">-</span><span v-else>+</span></span>
+      <div v-if="f0.childShow" class="list1" v-for="(f1,i1) in childMapList[f0.id._text] " :key='f1.id._text'>
+        <div @click='chooseFarm(f1)'>
+          <span class="symbol" v-if="f1.hasChild"><span v-if="f1.childShow">-</span><span v-else>+</span>&nbsp;</span>{{f1.name._text}}
+        </div>
+        <div v-if="f1.childShow" class="list1" v-for="f2 in childMapList[f1.id._text] " :key='f2.id._text'>
+          <div @click='chooseFarm(f2)'><span v-if="f2.hasChild">
+            <span v-if="f2.childShow">-</span><span v-else>+</span></span>
+            &nbsp;&nbsp;{{f2.name._text}}</div>
         </div>
       </div>
     </div>
@@ -43,14 +45,22 @@ export default {
       } else {
         console.log('farmId', farm.id._text)
         let data = await gatewayList({ farmId: farm.id._text })
+        console.log('data', data)
         if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
-          await setStorage(GATEWAY_LIST_FOR_LAST_FARM, {
-            data: { gateways: data.Result.Gateways.Gateway, farm: farm }
-          })
-          console.log('saved')
-          wx.navigateTo({
-            url: '/pages/monitors/roomList'
-          })
+          if (data.Result.Gateways.Gateway) {
+            if (!Array.isArray(data.Result.Gateways.Gateway)) {
+              let tmpArray = []
+              tmpArray.push(data.Result.Gateways.Gateway)
+              data.Result.Gateways.Gateway = tmpArray
+            }
+            await setStorage(GATEWAY_LIST_FOR_LAST_FARM, {
+              data: { gateways: data.Result.Gateways.Gateway, farm: farm }
+            })
+            console.log('saved')
+            wx.navigateTo({
+              url: '/pages/monitors/roomList'
+            })
+          }
         }
       }
     },
@@ -115,26 +125,52 @@ export default {
   },
 
   mounted() {
-    console.log('mounted')
     this.getInitData()
   }
 }
 
 </script>
 <style scoped>
+body {
+  background-color: #f8f9fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .container {
   height: 100%;
+  width: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 200rpx 0;
   box-sizing: border-box;
+  margin: 0 auto;
+}
+
+.symbol {
+  font-size: 60rpx;
+  font-weight: bold;
+  color: green;
 }
 
 .list {
   width: 100%;
-  padding-left: 40rpx;
+  padding-left: 60rpx;
+  padding-top: 15rpx;
+  padding-bottom: 10rpx;
+  background-color: #fff;
+  border: 1px solid #f8f9fb;
+  border-radius: 25rpx;
+}
+
+.list1 {
+  width: 100%;
+  padding-left: 60rpx;
+  padding-top: 15rpx;
+  padding-bottom: 10rpx;
 }
 
 </style>
