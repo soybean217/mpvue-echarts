@@ -13,7 +13,7 @@
 <script>
 import { getStorage, setStorage } from '@/utils/wechat'
 import { syncGatewaysConfig, gatewayDetail, redirectToRoomDetail, detailValueFormat } from '@/utils/api'
-const GATEWAY_LIST_FOR_LAST_FARM = 'GATEWAY_LIST_FOR_LAST_FARM'
+const WARN_GATEWAY_LIST = 'WARN_GATEWAY_LIST'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 const DETAIL_LIMIT = 4
@@ -25,24 +25,19 @@ export default {
   },
   methods: {
     toRoomDetail(gateway) {
-      if (gateway.details[0] != '设备离线') {
-        console.log('toRoomDetail', gateway._attributes.Id)
-        redirectToRoomDetail(gateway._attributes.Id)
-      }
+      redirectToRoomDetail(gateway._attributes.Id)
     },
     async getInitData() {
       console.log('getInitData')
-      let data = await getStorage(GATEWAY_LIST_FOR_LAST_FARM)
+      let data = await getStorage(WARN_GATEWAY_LIST)
       console.log('getInitData', data)
-      wx.setNavigationBarTitle({
-        title: data.data.data.farm.name._text
-      })
       this.farmInfo = data.data.data
       console.log('getInitData', data)
       syncGatewaysConfig({ gateways: this.farmInfo.gateways })
       for (let gateway of this.farmInfo.gateways) {
         var cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + gateway._attributes.Id)
-        console.log('gateway', cache)
+        console.log('gateway cache', cache)
+        gateway._attributes.Name = cache._attributes.Name
         let gw = await gatewayDetail({ gatewayId: gateway._attributes.Id })
         if (gw.Result.OnLine._text == 'Y') {
           let tmpCount = 0

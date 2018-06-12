@@ -29,6 +29,11 @@ module.exports = [{
     navigationBarTitleText: '栏舍列表'
   }
 }, {
+  path: '/pages/monitors/warnRoomList',
+  config: {
+    navigationBarTitleText: '异常栏舍'
+  }
+}, {
   path: '/pages/monitors/roomDetail',
   config: {
     navigationBarTitleText: '栏舍详情'

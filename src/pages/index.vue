@@ -13,6 +13,7 @@
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
 import { getAlarmInfo, getRemindInfo } from '@/utils/api'
+const WARN_GATEWAY_LIST = 'WARN_GATEWAY_LIST'
 
 let chart = null;
 var option = {}
@@ -21,9 +22,6 @@ function initChart(canvas, width, height) {
   chart = echarts.init(canvas, null, {
     width: width,
     height: height
-  });
-  chart.on("click", function(params) {
-    console.log('params', params)
   });
   canvas.setChart(chart);
 
@@ -60,10 +58,11 @@ function initChart(canvas, width, height) {
     }]
   }
   chart.on("mousedown", function(params) {
-    console.log('mousedown', params)
-  });
-  chart.on("pieselected", function(params) {
-    console.log('pieselected', params)
+    if (params.name == "异常栏舍") {
+      wx.navigateTo({
+        url: '/pages/monitors/warnRoomList'
+      })
+    }
   });
 
   // chart.setOption(option);
@@ -107,6 +106,15 @@ export default {
 
       let data = await getAlarmInfo()
       let normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
+      if (Array.isArray(data.Result.Alarm.Id)) {
+        for (let gateway of data.Result.Alarm.Id) {
+          gateway._attributes = {}
+          gateway._attributes.Id = gateway._text
+        }
+        wx.setStorageSync(WARN_GATEWAY_LIST, {
+          data: { gateways: data.Result.Alarm.Id }
+        })
+      }
       if (normalNumber > 0) {
         option.series[0].data = [{
           value: 100 - normalNumber,

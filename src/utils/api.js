@@ -222,7 +222,7 @@ async function cacheGatewayConfig({ gateway = {} } = {}) {
   try {
     var cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + gateway._attributes.Id)
     if (cache) {
-      if (cache._attributes.Version != gateway._attributes.Version) {
+      if (gateway._attributes.Version && cache._attributes.Version != gateway._attributes.Version) {
         let tmp = await getGatewayConfig({ gatewayId: gateway._attributes.Id })
         return tmp
       } else {
@@ -348,7 +348,6 @@ async function login({ userName = '', password = '' } = {}) {
         for (var gateway of data.Result.Gateways.Gateway) {
           cacheGatewayConfig({ gateway: gateway })
         }
-        // syncGatewaysConfig({ gateways: this.farmInfo.gateways })
       })
       console.log('login success')
       return data

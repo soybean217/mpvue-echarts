@@ -41,6 +41,7 @@ export default {
         this.farmData = []
         this.farmData = tmp
       } else {
+        console.log('farmId', farm.id._text)
         let data = await gatewayList({ farmId: farm.id._text })
         if (data.Result.ReturnFlag._text == '0' && data.Result.ReturnMsg._text == "success") {
           await setStorage(GATEWAY_LIST_FOR_LAST_FARM, {

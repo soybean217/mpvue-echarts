@@ -13,7 +13,9 @@ export default {
 </script>
 <style>
 .container {
+  /*
   height: 100vh;
+  */
   display: flex;
   align-items: center;
   background-color: #f8f9fb;
