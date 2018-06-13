@@ -27,7 +27,7 @@
 <script>
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
-import { gatewayDetail, detailValueFormat, hourData, minData } from '@/utils/api'
+import { gatewayDetail, detailValueFormat, hourData, minData, formatErrMsg } from '@/utils/api'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
@@ -247,12 +247,12 @@ export default {
       let gw = await gatewayDetail({ gatewayId: gatewayId })
       console.log('gw', gw)
       this.status = {}
-      this.status.days = gw.Result.Days._text
+      this.status.days = formatErrMsg(gw.Result.Days._text)
       this.status.online = gw.Result.OnLine._text == 'Y' ? '在线' : '离线'
       if (gw.Result.Alarm) {
         this.status.alarm = gw.Result.Alarm._text
       }
-      this.status.vLevel = gw.Result.VLevel._text
+      this.status.vLevel = formatErrMsg(gw.Result.VLevel._text)
       this.status.runMode = this.getRunModeText(gw.Result.RunMode._text)
       let details = []
       if (gw.Result.SensorDatas.Sensor) {
@@ -330,8 +330,9 @@ export default {
       }
     },
   },
-  onHide() {
-    console.log('onHide')
+  onShow() {
+    console.log('onShow')
+    this.timeType = 'hour'
   },
   onUnload() {
     console.log('onUnload')

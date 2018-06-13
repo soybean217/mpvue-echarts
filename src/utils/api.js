@@ -153,23 +153,35 @@ export function detailValueFormat({ config = {}, item = {}, catalog = '' } = {})
   }
   return item._attributes.Val
 }
+export function formatErrMsg(val) {
+  val = parseInt(val)
+  if (val <= -600) {
+    return _matchErrMsg(val)
+  } else {
+    return val
+  }
+}
+
+function _matchErrMsg(val) {
+  switch (val) {
+    case -999:
+      return '未接入'
+      break
+    case -998:
+      return '未配置'
+      break
+    case -888:
+      return '未录入'
+      break
+    default:
+      return '异常'
+  }
+}
 
 function _formatSensor({ config = {}, item = {} } = {}) {
   let val = parseInt(item._attributes.Val)
   if (val <= -600) {
-    switch (val) {
-      case -999:
-        return '未接入'
-        break
-      case -998:
-        return '未配置'
-        break
-      case -888:
-        return '未录入'
-        break
-      default:
-        return '异常'
-    }
+    return _matchErrMsg(val)
   } else {
     switch (config._attributes.Type) {
       case 'TEMPERATURE':
