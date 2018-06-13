@@ -28,15 +28,11 @@ export default {
       redirectToRoomDetail(gateway._attributes.Id)
     },
     async getInitData() {
-      console.log('getInitData')
       let data = await getStorage(WARN_GATEWAY_LIST)
-      console.log('getInitData', data)
       this.farmInfo = data.data.data
-      console.log('getInitData', data)
       syncGatewaysConfig({ gateways: this.farmInfo.gateways })
       for (let gateway of this.farmInfo.gateways) {
         var cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + gateway._attributes.Id)
-        console.log('gateway cache', cache)
         gateway._attributes.Name = cache._attributes.Name
         let gw = await gatewayDetail({ gatewayId: gateway._attributes.Id })
         if (gw.Result.OnLine._text == 'Y') {
@@ -81,7 +77,6 @@ export default {
     },
   },
   mounted() {
-    console.log('roomList mounted')
     this.getInitData()
     wx.showTabBar()
   }

@@ -2,7 +2,7 @@ import wx from 'wx'
 import Fly from 'flyio'
 
 const request = new Fly()
-const DEFAULT_URL = 'http://wlwhkq.loongk.com:8080'
+const DEFAULT_URL = 'https://wlwhkq.loongk.com'
 
 request.config.timeout = 10 * 1000
 // request.config.baseURL = 'http://wlwhkq.loongk.com:8080' 

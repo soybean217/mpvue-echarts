@@ -75,7 +75,6 @@ export async function minData({ machineId = '', hour = '' } = {}) {
   let result = await (request.post(`/langrh/mobile/mobile!minutesline.action`, json2Form(params)))
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
   checkResponse(data)
-  console.log('minData', data)
   return data
 }
 

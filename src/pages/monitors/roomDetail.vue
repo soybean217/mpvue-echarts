@@ -3,6 +3,9 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
+    <div class="status">
+      <span class="roomWarn" v-if="status.alarm">报警：{{status.alarm}}；</span> 日龄：{{status.days}}；状态：{{status.online}}；通风级别：{{status.vLevel}}
+    </div>
     <div class="monitors">
       <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
         <br><span class="dataValue">{{detail.value}}</span></div>
@@ -80,6 +83,7 @@ export default {
       echarts,
       onInit: initChart,
       details: [],
+      status: {},
       selectedHour: '',
       timeType: 'hour'
     }
@@ -201,8 +205,8 @@ export default {
       // console.log('chartData', chartData)
       // option.legend.data = [sensor.name]
       option.title = {
-        left: '40%',
-        text: '分钟数据',
+        left: '33%',
+        text: this.selectedHour + '点的分钟数据',
         textStyle: {
           fontSize: 16,
         }
@@ -221,12 +225,18 @@ export default {
       let gatewayId = wx.getStorageSync(CURRENT_GATEWAY)
       // console.log('getInitData', gatewayId)
       let cache = wx.getStorageSync(GATEWAY_CONFIG_PREFIX + '' + gatewayId)
-      // console.log('getInitData', cache)
+      console.log('gateway config cache', cache)
       wx.setNavigationBarTitle({
         title: cache._attributes.Name
       })
       let gw = await gatewayDetail({ gatewayId: gatewayId })
       console.log('gw', gw)
+      this.status.days = gw.Result.Days._text
+      this.status.online = gw.Result.OnLine._text == 'Y' ? '在线' : '离线'
+      if (gw.Result.Alarm) {
+        this.status.alarm = gw.Result.Alarm._text
+      }
+      this.status.vLevel = gw.Result.VLevel._text
       let details = []
       if (gw.Result.SensorDatas.Sensor) {
         for (let sensor of gw.Result.SensorDatas.Sensor) {
@@ -265,6 +275,24 @@ export default {
 
 </script>
 <style scoped>
+.roomWarn {
+  background: red;
+  animation: myblink 3s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes myblink {
+  0% {
+    background: red;
+  }
+  50% {
+    background: yellow;
+  }
+  100% {
+    background: red;
+  }
+}
+
 .monitor {
   float: left;
   width: 24%;
@@ -273,6 +301,11 @@ export default {
   background-color: #DBDBDB;
   border: 1px solid #f8f9fb;
   border-radius: 25rpx;
+}
+
+.status {
+  font-size: 14px;
+  padding: 0 40px 5px;
 }
 
 .monitorSelected {

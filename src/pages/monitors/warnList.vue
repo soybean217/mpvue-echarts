@@ -31,7 +31,6 @@ export default {
       redirectToRoomDetail(gatewayId)
     },
     async getInitData() {
-      console.log('(this.$root.$mp.query.type', this.$root.$mp.query.type)
       wx.setNavigationBarTitle({
         title: getWarnTypeNameById(this.$root.$mp.query.type)
       })
