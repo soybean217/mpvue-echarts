@@ -3,8 +3,20 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
-    <div class="status">
-      <span class="roomWarn" v-if="status.alarm">报警：{{status.alarm}}；</span> 日龄：{{status.days}}；状态：{{status.online}}；通风级别：{{status.vLevel}}
+    <div class="divFull" v-if="status.alarm"><span class="roomWarn">报警：{{status.alarm}}</span></div>
+    <div class="divFull">
+      <div class="status">
+        日龄：{{status.days}}
+      </div>
+      <div class="status">
+        状态：{{status.online}}
+      </div>
+      <div class="status">
+        通风级别：{{status.vLevel}}
+      </div>
+      <div class="status">
+        运行模式：{{status.runMode}}
+      </div>
     </div>
     <div class="monitors">
       <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
@@ -120,6 +132,10 @@ export default {
       } else {
         this.minDataMachine()
       }
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 300
+      })
     },
     procChartData(text) {
       if (text.indexOf('categories\:') != -1) {
@@ -231,12 +247,14 @@ export default {
       })
       let gw = await gatewayDetail({ gatewayId: gatewayId })
       console.log('gw', gw)
+      this.status = {}
       this.status.days = gw.Result.Days._text
       this.status.online = gw.Result.OnLine._text == 'Y' ? '在线' : '离线'
       if (gw.Result.Alarm) {
         this.status.alarm = gw.Result.Alarm._text
       }
       this.status.vLevel = gw.Result.VLevel._text
+      this.status.runMode = this.getRunModeText(gw.Result.RunMode._text)
       let details = []
       if (gw.Result.SensorDatas.Sensor) {
         for (let sensor of gw.Result.SensorDatas.Sensor) {
@@ -260,12 +278,32 @@ export default {
       }
       this.details = details
     },
-    onHide() {
-      console.log('onHide')
+    getRunModeText(mode) {
+      switch (mode) {
+        case "1":
+          return "智能模式"
+        case "2":
+          return "受控模式"
+        case "10":
+          return "最小通风"
+        case "11":
+          return "横向通风"
+        case "12":
+          return "过渡通风"
+        case "13":
+          return "隧道通风"
+        case "99":
+          return "空舍模式"
+        default:
+          return "未定义"
+      }
     },
-    onUnload() {
-      console.log('onUnload')
-    },
+  },
+  onHide() {
+    console.log('onHide')
+  },
+  onUnload() {
+    console.log('onUnload')
   },
   mounted() {
     console.log('roomDetail mounted', getCurrentPages())
@@ -275,6 +313,12 @@ export default {
 
 </script>
 <style scoped>
+.divFull {
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+}
+
 .roomWarn {
   background: red;
   animation: myblink 3s;
@@ -305,7 +349,11 @@ export default {
 
 .status {
   font-size: 14px;
-  padding: 0 40px 5px;
+  padding: 0 0 5px;
+  float: left;
+  width: 48%;
+  background-color: #f3f3f3;
+  border: 1px solid #f8f9fb;
 }
 
 .monitorSelected {
