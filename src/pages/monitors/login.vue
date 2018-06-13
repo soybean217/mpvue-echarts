@@ -91,9 +91,10 @@ export default {
 
 .form-control {
   display: block;
-  padding: 0 12px;
+  padding: 5px 12px;
   margin-bottom: 5px;
   border: 1px solid #ccc;
+  border-radius: 5rpx;
 }
 
 .counter {
@@ -102,6 +103,7 @@ export default {
   padding: 5px 10px;
   color: blue;
   border: 1px solid blue;
+  border-radius: 25rpx;
 }
 
 </style>

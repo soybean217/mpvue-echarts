@@ -37,7 +37,7 @@ export default {
           selectedIconPath: 'static/images/board-actived.png'
         },
         {
-          text: '我的',
+          text: '设置',
           pagePath: 'pages/monitors/profile',
           iconPath: 'static/images/profile.png',
           selectedIconPath: 'static/images/profile-actived.png'

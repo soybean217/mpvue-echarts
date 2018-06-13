@@ -11,12 +11,12 @@ module.exports = [{
 }, {
   path: '/pages/monitors/login',
   config: {
-    navigationBarTitleText: 'login'
+    navigationBarTitleText: '小猪微助手'
   }
 }, {
   path: '/pages/monitors/profile',
   config: {
-    navigationBarTitleText: '我的'
+    navigationBarTitleText: '设置'
   }
 }, {
   path: '/pages/monitors/serverEdit',

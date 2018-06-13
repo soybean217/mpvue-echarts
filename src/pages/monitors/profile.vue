@@ -1,48 +1,69 @@
 <template>
   <div class="container">
-    <!-- <div class="wrap">
-      <div class="stat">合格率(%)
-        <br>0</div>
-      <div class="stat">总次数
-        <br>4</div>
-      <div class="stat">总时长
-        <br>21：20</div>
-    </div> -->
-    <div class="wrap">
-    </div>
     <a class="wrap" href="login">
       重新登录
     </a>
     <a class="wrap" href="serverEdit">
       设置服务器
     </a>
+    <span class="wrap" @click='logout'>
+      注销
+    </span>
   </div>
 </template>
 <script>
-import { getRemindInfo, redirectToRoomDetail } from '@/utils/api'
+const LAST_SUCCESS_LOGIN_INPUT = 'LAST_SUCCESS_LOGIN_INPUT'
+const LAST_SUCCESS_LOGIN_TICKET = 'LAST_SUCCESS_LOGIN_TICKET'
 export default {
   data() {
     return {}
   },
   methods: {
-
+    logout() {
+      wx.setStorageSync(LAST_SUCCESS_LOGIN_INPUT, false)
+      wx.setStorageSync(LAST_SUCCESS_LOGIN_TICKET, false)
+      wx.showModal({
+        title: '注销成功',
+        showCancel: false,
+        success: function(res) {
+          if (res.confirm) {
+            wx.redirectTo({ url: '/pages/monitors/login' })
+          }
+        }
+      })
+    },
   },
   mounted() {}
 }
 
 </script>
 <style scoped>
-.stat {
+body {
+  background-color: #f8f9fb;
+  display: flex;
   align-items: center;
-  width: 30%;
-  text-align: center;
-  float: left;
-  padding: 15px 0;
+  justify-content: center;
 }
 
 .wrap {
-  width: 100%;
-  padding-left: 20px;
+  width: 80%;
+  display: inline-block;
+  margin: 10px auto;
+  padding: 5px 10px;
+  text-align: center;
+  color: blue;
+  border: 1px solid blue;
+  border-radius: 25rpx;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 200rpx 0;
+  box-sizing: border-box;
 }
 
 </style>

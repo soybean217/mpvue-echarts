@@ -145,7 +145,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 200rpx 0;
+  padding: 80rpx 0;
   box-sizing: border-box;
   margin: 0 auto;
 }

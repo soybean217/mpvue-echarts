@@ -200,7 +200,6 @@ export default {
       // console.log('this.details', this.details)
       for (let sensor of this.details) {
         if (sensor.isSelected) {
-          console.log('minDataMachine sensor', this.selectedHour, sensor)
           let data = await minData({ machineId: sensor.config._attributes.Id, hour: this.selectedHour })
           let chartData = this.procChartData(data.Result.Datas._text)
           option.legend.data.push(sensor.name)

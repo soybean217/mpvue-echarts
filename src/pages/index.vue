@@ -149,11 +149,11 @@ export default {
   },
   mounted() {
     // console.log('mounted')
-    // this.getInitData()
+    this.getInitData()
   },
   onShow() {
     console.log('onShow')
-    this.getInitData()
+    // this.getInitData()
     // chartPie.on("mousedown", function(params) {
     //   console.log('mousedown', params)
     //   if (params.name == "异常栏舍") {

@@ -220,16 +220,12 @@ function _formatController({ config = {}, item = {} } = {}) {
     switch (item._attributes.Val) {
       case '0':
         return '关'
-        break
       case '1':
         return '正开'
-        break
       case '2':
         return '反开'
-        break
       case '3':
         return '错误'
-        break
       default:
         return item._attributes.Val
     }
