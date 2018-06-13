@@ -20,7 +20,7 @@
     </div>
     <div class="monitors">
       <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
-        <br><span class="dataValue">{{detail.value}}</span></div>
+        <br><img v-if="detail.icon" class="imgIcon" :src="detail.icon" /><span v-else class="dataValue">{{detail.value}}</span></div>
     </div>
   </div>
 </template>
@@ -260,7 +260,13 @@ export default {
         for (let sensor of gw.Result.SensorDatas.Sensor) {
           for (let sensorConfig of cache.Sensors.Sensor) {
             if (sensorConfig._attributes.Id == sensor._attributes.Id) {
-              details.push({ isSelected: false, catalog: 'sensor', 'name': sensorConfig._attributes.Name, config: sensorConfig, 'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }) })
+              details.push({
+                isSelected: false,
+                catalog: 'sensor',
+                'name': sensorConfig._attributes.Name,
+                config: sensorConfig,
+                'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' })
+              })
               break
             }
           }
@@ -270,13 +276,39 @@ export default {
         for (var item of gw.Result.ControllerDatas.Controller) {
           for (let config of cache.Controllers.Controller) {
             if (config._attributes.Id == item._attributes.Id) {
-              details.push({ isSelected: false, catalog: 'controller', 'name': config._attributes.Name, config: config, 'value': detailValueFormat({ config: config, item: item, catalog: 'controller' }) })
+              details.push({
+                isSelected: false,
+                catalog: 'controller',
+                'name': config._attributes.Name,
+                config: config,
+                'value': detailValueFormat({ config: config, item: item, catalog: 'controller' }),
+                'icon': this.getControlIcon({ config: config, item: item, catalog: 'controller' }),
+              })
               break
             }
           }
         }
       }
       this.details = details
+    },
+    getControlIcon({ config = {}, item = {} } = {}) {
+      let dictory = '/static/images/breed/'
+      if (item._attributes.Degree.length > 0 && item._attributes.Degree != '0') {
+        return false
+      } else {
+        switch (item._attributes.Val) {
+          case '0':
+            return dictory + config._attributes.Type.toLowerCase() + '_forwardoff.png'
+          case '1':
+            return dictory + config._attributes.Type.toLowerCase() + '_forwardinhandon.png'
+          case '2':
+            return dictory + config._attributes.Type.toLowerCase() + '_forwardinhandon.png'
+          case '3':
+            return dictory + config._attributes.Type.toLowerCase() + '_forwarderror.png'
+          default:
+            return false
+        }
+      }
     },
     getRunModeText(mode) {
       switch (mode) {
@@ -340,6 +372,7 @@ export default {
 .monitor {
   float: left;
   width: 24%;
+  height: 60px;
   text-align: center;
   padding: 30rpx 0;
   background-color: #DBDBDB;
@@ -358,6 +391,11 @@ export default {
 
 .monitorSelected {
   background-color: #99FFFF;
+}
+
+.imgIcon {
+  width: 40px;
+  height: 40px;
 }
 
 .monitors {
@@ -379,11 +417,12 @@ export default {
 }
 
 .dataTitle {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .dataValue {
   font-weight: bold;
+  font-size: 16px;
   color: #6E8B3D;
 }
 
