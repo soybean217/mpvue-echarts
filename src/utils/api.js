@@ -45,12 +45,12 @@ export function getWarnTypeNameById(typeId) {
   }
 }
 export function formatArray(target) {
-  if (target && !Array.isArray(target)) {
+  if (Array.isArray(target)) {
+    return target
+  } else {
     let result = []
     result.push(tareget)
     return result
-  } else {
-    return target
   }
 }
 

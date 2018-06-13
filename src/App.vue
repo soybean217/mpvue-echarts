@@ -31,4 +31,22 @@ body {
   background-color: #f8f9fb;
 }
 
+.roomWarn {
+  background: red;
+  animation: myblink 3s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes myblink {
+  0% {
+    background: red;
+  }
+  50% {
+    background: yellow;
+  }
+  100% {
+    background: red;
+  }
+}
+
 </style>

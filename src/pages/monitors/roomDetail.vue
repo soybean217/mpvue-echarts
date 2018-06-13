@@ -350,23 +350,6 @@ export default {
   font-size: 14px;
 }
 
-.roomWarn {
-  background: red;
-  animation: myblink 3s;
-  animation-iteration-count: infinite;
-}
-
-@keyframes myblink {
-  0% {
-    background: red;
-  }
-  50% {
-    background: yellow;
-  }
-  100% {
-    background: red;
-  }
-}
 
 .monitor {
   float: left;
@@ -374,7 +357,10 @@ export default {
   height: 60px;
   text-align: center;
   padding: 30rpx 0;
+  /*
   background-color: #DBDBDB;
+  */
+  background-color: #fff;
   border: 1px solid #f8f9fb;
   border-radius: 25rpx;
 }

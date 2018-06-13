@@ -3,10 +3,15 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="index-pie" />
     </div>
-    <a href="/pages/monitors/warnList?type=1" class="exception">昨日警报<br><span class="boldNumber">{{remindCount['1']}}</span></a>
-    <a href="/pages/monitors/warnList?type=2" class="exception">日常事务<br><span class="boldNumber">{{remindCount['2']}}</span></a>
-    <a href="/pages/monitors/warnList?type=3" class="exception">设备到期<br><span class="boldNumber">{{remindCount['3']}}</span></a>
-    <a href="/pages/monitors/warnList?type=4" class="exception">参数修改<br><span class="boldNumber">{{remindCount['4']}}</span></a>
+    <div class="divFull" v-if='alartCount' @click='goWarnRoomList'><span class="roomWarn">报警栏舍数量：{{alartCount}}</span></div>
+    <div @click="goWarnMsgList('1')" class="exception">昨日警报
+      <br><span class="boldNumber">{{remindCount['1']}}</span></div>
+    <div @click="goWarnMsgList('2')" class="exception">日常事务
+      <br><span class="boldNumber">{{remindCount['2']}}</span></div>
+    <div @click="goWarnMsgList('3')" class="exception">设备到期
+      <br><span class="boldNumber">{{remindCount['3']}}</span></div>
+    <div @click="goWarnMsgList('4')" class="exception">参数修改
+      <br><span class="boldNumber">{{remindCount['4']}}</span></div>
   </div>
 </template>
 <script>
@@ -82,9 +87,22 @@ export default {
       onInit: initChart,
       remindCount: { "1": 0, "2": 0, "3": 0, "4": 0 },
       normalNumber: 0,
+      alartCount: 0
     }
   },
   methods: {
+    goWarnMsgList(id) {
+      if (this.remindCount[id] > 0) {
+        wx.navigateTo({
+          url: '/pages/monitors/warnList?type=' + id
+        })
+      }
+    },
+    goWarnRoomList() {
+      wx.navigateTo({
+        url: '/pages/monitors/warnRoomList'
+      })
+    },
     async getInitData() {
       let remindInfo = await getRemindInfo()
       for (let tmp in this.remindCount) {
@@ -102,20 +120,22 @@ export default {
           this.remindCount[info.remind_type._text] = 1
         }
       }
-
       let data = await getAlarmInfo()
       this.normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
-      console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
-      data.Result.Alarm.Id = formatArray(data.Result.Alarm.Id)
-      console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
-      if (Array.isArray(data.Result.Alarm.Id)) {
-        for (let gateway of data.Result.Alarm.Id) {
-          gateway._attributes = {}
-          gateway._attributes.Id = gateway._text
+      if (data.Result.Alarm.Id) {
+        console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
+        data.Result.Alarm.Id = formatArray(data.Result.Alarm.Id)
+        this.alartCount = data.Result.Alarm.Id.length
+        console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
+        if (Array.isArray(data.Result.Alarm.Id)) {
+          for (let gateway of data.Result.Alarm.Id) {
+            gateway._attributes = {}
+            gateway._attributes.Id = gateway._text
+          }
+          wx.setStorageSync(WARN_GATEWAY_LIST, {
+            data: { gateways: data.Result.Alarm.Id }
+          })
         }
-        wx.setStorageSync(WARN_GATEWAY_LIST, {
-          data: { gateways: data.Result.Alarm.Id }
-        })
       }
       if (this.normalNumber > 0) {
         option.series[0].data = [{
@@ -141,19 +161,16 @@ export default {
           })
         }
       });
-      chartPie.on("mousedown", this.registerMouseDown)
-
       // this.drawChart()
     },
-
   },
   mounted() {
     // console.log('mounted')
-    this.getInitData()
+    // this.getInitData()
   },
   onShow() {
     console.log('onShow')
-    // this.getInitData()
+    this.getInitData()
     // chartPie.on("mousedown", function(params) {
     //   console.log('mousedown', params)
     //   if (params.name == "异常栏舍") {
@@ -168,11 +185,20 @@ export default {
 
 </script>
 <style scoped>
+.divFull {
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+}
+
 .exception {
   width: 49%;
   text-align: center;
   padding: 20px 0;
+  /*
   background-color: #DBDBDB;
+  */
+  background-color: #fff;
   border: 1px solid #f8f9fb;
 }
 
