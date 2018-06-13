@@ -44,6 +44,15 @@ export function getWarnTypeNameById(typeId) {
       return '未定义'
   }
 }
+export function formatArray(target) {
+  if (target && !Array.isArray(target)) {
+    let result = []
+    result.push(tareget)
+    return result
+  } else {
+    return target
+  }
+}
 
 export async function hourData({ machineId = '' } = {}) {
   let ticket = getLastSuccessTicket()
@@ -52,14 +61,37 @@ export async function hourData({ machineId = '' } = {}) {
   params.machineid = machineId
   let result = await (request.post(`/langrh/mobile/mobile!hourline.action`, json2Form(params)))
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
-  console.log('hourData', data)
+  checkResponse(data)
   return data
+}
+export async function minData({ machineId = '', hour = '' } = {}) {
+  let ticket = getLastSuccessTicket()
+  let params = {}
+  params.ticket = ticket.data.ticket
+  params.machineid = machineId
+  let cDate = new Date()
+  params.searchhour = cDate.getFullYear() + '-' + fillZeroForMinute(cDate.getMonth() + 1) + '-' + fillZeroForMinute(cDate.getDate()) + ' ' + fillZeroForMinute(hour)
+  // console.log('json2Form(params)', json2Form(params))
+  let result = await (request.post(`/langrh/mobile/mobile!minutesline.action`, json2Form(params)))
+  let data = JSON.parse(convert.xml2json(result, { compact: true }))
+  checkResponse(data)
+  console.log('minData', data)
+  return data
+}
+
+function fillZeroForMinute(input) {
+  if (input.toString().length == 1) {
+    return '0' + input
+  } else {
+    return input
+  }
 }
 export async function getAlarmInfo() {
   let ticket = getLastSuccessTicket()
   let params = {}
   params.paramStr = JSON.stringify({ ticket: ticket.data.ticket })
   let result = await request.post(`/langrh/mobile/mobileGateway!getAlarmRate.action`, json2Form(params))
+  console.log('getAlarmInfo', result)
   let data = JSON.parse(convert.xml2json(result, { compact: true }))
   console.log('getAlarmInfo', data)
   let check = checkResponse(data)

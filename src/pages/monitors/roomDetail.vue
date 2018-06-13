@@ -3,14 +3,16 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
-    <div class="monitor" v-for="(detail,i1) in details" :key='i1' @click='hourDataMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
-      <br><span class="dataValue">{{detail.value}}</span></div>
+    <div class="monitors">
+      <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
+        <br><span class="dataValue">{{detail.value}}</span></div>
+    </div>
   </div>
 </template>
 <script>
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
-import { gatewayDetail, detailValueFormat, hourData } from '@/utils/api'
+import { gatewayDetail, detailValueFormat, hourData, minData } from '@/utils/api'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
@@ -22,20 +24,18 @@ function initChart(canvas, width, height) {
     width: width,
     height: height
   });
-  chart.on("mousedown", function(params) {
-    console.log('mousedown', params)
-  });
+
   canvas.setChart(chart);
 
   option = {
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
+    backgroundColor: 'rgba(128, 128, 128, 0)',
     color: ['#37A2DA', '#67E0E3', '#9FE6B8'],
     // tooltip: {
     //   trigger: 'axis'
     // },
     legend: {
-      top: 'bottom',
-      // bottom: '10%',
+      bottom: '10%',
       data: ['温度']
     },
     grid: {
@@ -79,15 +79,45 @@ export default {
     return {
       echarts,
       onInit: initChart,
-      details: []
+      details: [],
+      selectedHour: '',
+      timeType: 'hour'
     }
   },
   methods: {
-    async hourDataMachine(machine) {
-      // console.log('hourDataMachine machine', machine)
-      let data = await hourData({ machineId: machine.config._attributes.Id })
-      // console.log('data', data)
-      let text = data.Result.Datas._text
+    selectMachine(sensor) {
+      if (sensor.catalog == 'sensor') {
+        let countSelected = 0
+        for (let item of this.details) {
+          if (item.isSelected) {
+            countSelected++
+            if (countSelected >= 3) {
+              break;
+            }
+          }
+        }
+        if (countSelected != 3) {
+          sensor.isSelected = !sensor.isSelected
+          this.refreshDetails()
+        } else {
+          if (sensor.isSelected) {
+            sensor.isSelected = !sensor.isSelected
+            this.refreshDetails()
+          }
+        }
+      }
+    },
+    refreshDetails() {
+      let tmpDetails = this.details
+      this.details = []
+      this.details = tmpDetails
+      if (this.timeType == 'hour') {
+        this.hourDataMachine()
+      } else {
+        this.minDataMachine()
+      }
+    },
+    procChartData(text) {
       if (text.indexOf('categories\:') != -1) {
         text = text.replace('categories', '\"categories\"')
       }
@@ -99,24 +129,93 @@ export default {
         text = text.replace(',0' + i + ',', ',' + i + ',')
         text = text.replace(',0' + i + ']', ',' + i + ']')
       }
-      // console.log('text', text)
-      let chartData = JSON.parse(text)
+      return JSON.parse(text)
+    },
+    async hourDataMachine() {
+      option.legend.data = []
+      option.series = []
+      for (let sensor of this.details) {
+        if (sensor.isSelected) {
+          // console.log('hourDataMachine sensor', sensor)
+          let data = await hourData({ machineId: sensor.config._attributes.Id })
+          let chartData = this.procChartData(data.Result.Datas._text)
+          option.legend.data.push(sensor.name)
+          option.xAxis = {
+            type: 'category',
+            boundaryGap: false,
+            data: chartData.categories
+          }
+          option.series.push({
+            name: sensor.name,
+            type: 'line',
+            symbolSize: 16,
+            smooth: true,
+            data: chartData.data
+          })
+        }
+      }
+      option.title = {
+        left: '40%',
+        text: '小时数据',
+        textStyle: {
+          fontSize: 16,
+        }
+      }
       // console.log('chartData', chartData)
-      option.legend = {
-        data: [machine.name]
-      }
-      option.xAxis = {
-        type: 'category',
-        boundaryGap: false,
-        data: chartData.categories
-      }
-      option.series = [{
-        name: machine.name,
-        type: 'line',
-        smooth: true,
-        data: chartData.data
-      }]
+      // option.legend.data = [sensor.name]
+      chart.clear()
       chart.setOption(option);
+      this.timeType = 'hour'
+      chart.off("mousedown");
+      let app = this
+      chart.on("mousedown", function(params) {
+        console.log('mousedown', params)
+        app.selectedHour = params.name
+        app.minDataMachine()
+      });
+    },
+    async minDataMachine() {
+      option.legend.data = []
+      option.series = []
+      // console.log('this.details', this.details)
+      for (let sensor of this.details) {
+        if (sensor.isSelected) {
+          console.log('minDataMachine sensor', this.selectedHour, sensor)
+          let data = await minData({ machineId: sensor.config._attributes.Id, hour: this.selectedHour })
+          let chartData = this.procChartData(data.Result.Datas._text)
+          option.legend.data.push(sensor.name)
+          option.xAxis = {
+            type: 'category',
+            boundaryGap: false,
+            data: chartData.categories
+          }
+          option.series.push({
+            name: sensor.name,
+            type: 'line',
+            symbolSize: 16,
+            smooth: true,
+            data: chartData.data
+          })
+        }
+      }
+      // console.log('chartData', chartData)
+      // option.legend.data = [sensor.name]
+      option.title = {
+        left: '40%',
+        text: '分钟数据',
+        textStyle: {
+          fontSize: 16,
+        }
+      }
+      chart.clear()
+      chart.setOption(option);
+      this.timeType = 'minute'
+      chart.off("mousedown");
+      let app = this
+      chart.on("mousedown", function(params) {
+        console.log('mousedown', params)
+        app.hourDataMachine()
+      });
     },
     async getInitData() {
       let gatewayId = wx.getStorageSync(CURRENT_GATEWAY)
@@ -133,7 +232,7 @@ export default {
         for (let sensor of gw.Result.SensorDatas.Sensor) {
           for (let sensorConfig of cache.Sensors.Sensor) {
             if (sensorConfig._attributes.Id == sensor._attributes.Id) {
-              details.push({ 'name': sensorConfig._attributes.Name, config: sensorConfig, 'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }) })
+              details.push({ isSelected: false, catalog: 'sensor', 'name': sensorConfig._attributes.Name, config: sensorConfig, 'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' }) })
               break
             }
           }
@@ -143,13 +242,19 @@ export default {
         for (var item of gw.Result.ControllerDatas.Controller) {
           for (let config of cache.Controllers.Controller) {
             if (config._attributes.Id == item._attributes.Id) {
-              details.push({ 'name': config._attributes.Name, config: config, 'value': detailValueFormat({ config: config, item: item, catalog: 'controller' }) })
+              details.push({ isSelected: false, catalog: 'controller', 'name': config._attributes.Name, config: config, 'value': detailValueFormat({ config: config, item: item, catalog: 'controller' }) })
               break
             }
           }
         }
       }
       this.details = details
+    },
+    onHide() {
+      console.log('onHide')
+    },
+    onUnload() {
+      console.log('onUnload')
     },
   },
   mounted() {
@@ -162,9 +267,23 @@ export default {
 <style scoped>
 .monitor {
   float: left;
-  width: 25%;
+  width: 24%;
   text-align: center;
-  padding: 30px 0;
+  padding: 30rpx 0;
+  background-color: #DBDBDB;
+  border: 1px solid #f8f9fb;
+  border-radius: 25rpx;
+}
+
+.monitorSelected {
+  background-color: #99FFFF;
+}
+
+.monitors {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .link {
@@ -180,11 +299,11 @@ export default {
 
 .dataTitle {
   font-size: 16px;
-  color: #6fb7b7;
 }
 
 .dataValue {
   font-weight: bold;
+  color: #6E8B3D;
 }
 
 </style>

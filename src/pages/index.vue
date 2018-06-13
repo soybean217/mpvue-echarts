@@ -12,18 +12,26 @@
 <script>
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
-import { getAlarmInfo, getRemindInfo } from '@/utils/api'
+import { getAlarmInfo, getRemindInfo, formatArray } from '@/utils/api'
 const WARN_GATEWAY_LIST = 'WARN_GATEWAY_LIST'
 
-let chart = null;
+var chartPie = null;
 var option = {}
 
 function initChart(canvas, width, height) {
-  chart = echarts.init(canvas, null, {
+  chartPie = echarts.init(canvas, null, {
     width: width,
     height: height
   });
-  canvas.setChart(chart);
+  canvas.setChart(chartPie);
+  // chartPie.on("mousedown", function(params) {
+  //   console.log('mousedown', params)
+  //   if (params.name == "异常栏舍") {
+  //     wx.navigateTo({
+  //       url: '/pages/monitors/warnRoomList'
+  //     })
+  //   }
+  // });
 
   option = {
     backgroundColor: '#84c1ff',
@@ -57,17 +65,10 @@ function initChart(canvas, width, height) {
       }
     }]
   }
-  chart.on("mousedown", function(params) {
-    if (params.name == "异常栏舍") {
-      wx.navigateTo({
-        url: '/pages/monitors/warnRoomList'
-      })
-    }
-  });
 
-  // chart.setOption(option);
+  // chartPie.setOption(option);
 
-  return chart; // 返回 chart 后可以自动绑定触摸操作
+  return chartPie; // 返回 chartPie 后可以自动绑定触摸操作
 }
 
 
@@ -80,12 +81,10 @@ export default {
       echarts,
       onInit: initChart,
       remindCount: { "1": 0, "2": 0, "3": 0, "4": 0 },
+      normalNumber: 0,
     }
   },
   methods: {
-    clickPie() {
-      console.log('clickPie')
-    },
     async getInitData() {
       let remindInfo = await getRemindInfo()
       for (let tmp in this.remindCount) {
@@ -105,7 +104,10 @@ export default {
       }
 
       let data = await getAlarmInfo()
-      let normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
+      this.normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
+      console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
+      data.Result.Alarm.Id = formatArray(data.Result.Alarm.Id)
+      console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
       if (Array.isArray(data.Result.Alarm.Id)) {
         for (let gateway of data.Result.Alarm.Id) {
           gateway._attributes = {}
@@ -115,12 +117,12 @@ export default {
           data: { gateways: data.Result.Alarm.Id }
         })
       }
-      if (normalNumber > 0) {
+      if (this.normalNumber > 0) {
         option.series[0].data = [{
-          value: 100 - normalNumber,
+          value: 100 - this.normalNumber,
           name: '正常栏舍',
         }, {
-          value: normalNumber,
+          value: this.normalNumber,
           name: '异常栏舍',
         }]
       } else {
@@ -129,11 +131,38 @@ export default {
           name: '正常栏舍',
         }]
       }
-      chart.setOption(option);
+      chartPie.clear()
+      chartPie.setOption(option);
+      chartPie.on("mousedown", function(params) {
+        console.log('mousedown', params)
+        if (params.name == "异常栏舍") {
+          wx.navigateTo({
+            url: '/pages/monitors/warnRoomList'
+          })
+        }
+      });
+      chartPie.on("mousedown", this.registerMouseDown)
+
+      // this.drawChart()
     },
+
   },
   mounted() {
+    // console.log('mounted')
+    // this.getInitData()
+  },
+  onShow() {
+    console.log('onShow')
     this.getInitData()
+    // chartPie.on("mousedown", function(params) {
+    //   console.log('mousedown', params)
+    //   if (params.name == "异常栏舍") {
+    //     wx.navigateTo({
+    //       url: '/pages/monitors/warnRoomList'
+    //     })
+    //   }
+    // });
+    // chartPie.setOption(option);
   }
 }
 
@@ -148,7 +177,6 @@ export default {
 }
 
 .boldNumber {
-  font-color: #6E8B3D;
   color: #6E8B3D;
   font-size: 30px;
   font-weight: bold;

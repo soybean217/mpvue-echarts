@@ -158,11 +158,12 @@ body {
 
 .list {
   width: 100%;
+  font-size: 40rpx;
   padding-left: 60rpx;
   padding-top: 15rpx;
   padding-bottom: 10rpx;
   background-color: #fff;
-  border: 1px solid #f8f9fb;
+  border: 5rpx solid #f8f9fb;
   border-radius: 25rpx;
 }
 
