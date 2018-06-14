@@ -175,8 +175,9 @@ export default {
         }
       }
       option.title = {
-        left: '40%',
+        left: '50%',
         text: '小时数据',
+        textAlign: 'center',
         textStyle: {
           fontSize: 16,
         }
@@ -220,8 +221,9 @@ export default {
       // console.log('chartData', chartData)
       // option.legend.data = [sensor.name]
       option.title = {
-        left: '33%',
+        left: '50%',
         text: this.selectedHour + '点的分钟数据',
+        textAlign: 'center',
         textStyle: {
           fontSize: 16,
         }
