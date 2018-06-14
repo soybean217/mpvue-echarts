@@ -3,7 +3,10 @@
     <div class="echarts-wrap">
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="index-pie" />
     </div>
-    <div class="divFull" v-if='alartCount' @click='goWarnRoomList'><span class="roomWarn">报警栏舍数量：{{alartCount}}</span></div>
+    <div class="divFull" v-if='alartCount' @click='goWarnRoomList'>
+      <span class="roomWarn">报警栏舍数量：{{alartCount}}</span>
+    </div>
+    <!-- <div class="divB1"> -->
     <div @click="goWarnMsgList('1')" class="exception">昨日警报
       <br><span class="boldNumber">{{remindCount['1']}}</span></div>
     <div @click="goWarnMsgList('2')" class="exception">日常事务
@@ -12,6 +15,7 @@
       <br><span class="boldNumber">{{remindCount['3']}}</span></div>
     <div @click="goWarnMsgList('4')" class="exception">参数修改
       <br><span class="boldNumber">{{remindCount['4']}}</span></div>
+    <!-- </div> -->
   </div>
 </template>
 <script>
@@ -40,7 +44,7 @@ function initChart(canvas, width, height) {
 
   option = {
     backgroundColor: '#84c1ff',
-    color: ['#7CCD7C', '#ff0000', '#67E0E3', '#91F2DE', '#FFDB5C', '#FF9F7F'],
+    color: ['#1A9D54', '#fe0000', '#67E0E3', '#91F2DE', '#FFDB5C', '#FF9F7F'],
     series: [{
       label: {
         show: false,
@@ -141,22 +145,23 @@ export default {
       if (this.normalNumber > 0) {
         option.series[0].data = [{
           value: 100 - this.normalNumber,
-          name: '正常栏舍',
+          name: '正常' + (100 - this.normalNumber) + '%',
         }, {
           value: this.normalNumber,
-          name: '异常栏舍',
+          name: '异常' + this.normalNumber + '%',
         }]
       } else {
         option.series[0].data = [{
           value: 100,
-          name: '正常栏舍',
+          name: '正常100%',
         }]
       }
       chartPie.clear()
       chartPie.setOption(option);
+      chartPie.off("mousedown")
       chartPie.on("mousedown", function(params) {
         console.log('mousedown', params)
-        if (params.name == "异常栏舍") {
+        if (params.name.startsWith("异常")) {
           wx.navigateTo({
             url: '/pages/monitors/warnRoomList'
           })
@@ -193,24 +198,46 @@ export default {
 .divFull {
   width: 100%;
   text-align: center;
+  font-size: 20px;
+  padding-bottom: 5px;
+}
+
+.divB1 {
+  width: 90%;
+  text-align: center;
   font-size: 14px;
+  font-weight: bold;
 }
 
 .exception {
-  width: 49%;
+  width: 360rpx;
+  float: left;
   text-align: center;
   padding: 20px 0;
   /*
   background-color: #DBDBDB;
   */
+  font-weight: bold;
   background-color: #fff;
-  border: 1px solid #f8f9fb;
+  border: 2px solid #ddd;
+  border-radius: 25rpx;
 }
 
 .boldNumber {
   color: #6E8B3D;
   font-size: 30px;
   font-weight: bold;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  /*
+  flex-direction: column;
+  */
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .echarts-wrap {

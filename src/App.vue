@@ -28,11 +28,10 @@ export default {
 }
 
 body {
-  background-color: #f1f1f1;
+  background-color: #ddd;
 }
 
-.bigBtn
- {
+.bigBtn {
   width: 80%;
   display: inline-block;
   margin: 10px auto;
@@ -44,8 +43,7 @@ body {
   box-shadow: 2px 2px 5px #000;
 }
 
-.smallBtn
- {
+.smallBtn {
   display: inline-block;
   margin: 10px auto;
   padding: 5px 10px;

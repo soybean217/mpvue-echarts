@@ -22,7 +22,7 @@ export default {
     tabBar: {
       color: '#666666',
       selectedColor: '#000000',
-      borderStyle: 'white',
+      borderStyle: 'black',
       backgroundColor: '#fff',
       list: [{
           text: '首页',
