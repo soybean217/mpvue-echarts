@@ -4,23 +4,24 @@
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
     <div class="divFull" v-if="status.alarm"><span class="roomWarn">报警：{{status.alarm}}</span></div>
-    <div class="divFull">
-      <div class="status">
-        日龄：{{status.days}}
-      </div>
-      <div class="status">
-        状态：{{status.online}}
-      </div>
-      <div class="status">
-        通风级别：{{status.vLevel}}
-      </div>
-      <div class="status">
-        运行模式：{{status.runMode}}
-      </div>
+    <!-- <div class="status">
+      日龄：<span class="colorGreen" v-bind:class="status.days.style?status.days.style:{}">{{status.days.text}}</span>
+    </div>
+    <div class="status">
+      通风：<span class="colorGreen" v-bind:class="">{{status.vLevel.text}}</span>
+    </div>
+    <div class="status">
+      模式：<span class="colorGreen" v-bind:class="">{{status.runMode.text}}</span>
+    </div>
+    <div class="status">
+      状态：<span class="colorGreen" v-bind:class="">{{status.online.text}}</span>
+    </div> -->
+    <div class="status" v-for="(para,i2) in addtionParas" :key='i2'>
+      {{para.title}}：<span class="colorGreen" v-bind:class="para.style">{{para.description}}</span>
     </div>
     <div class="monitors">
       <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
-        <br><img v-if="detail.icon" class="imgIcon" :src="detail.icon" /><span v-else class="dataValue">{{detail.value}}</span></div>
+        <br><img v-if="detail.icon" class="imgIcon" :src="detail.icon" /><span v-else class="dataValue" v-bind:class="detail.style">{{detail.value}}</span></div>
     </div>
   </div>
 </template>
@@ -97,10 +98,24 @@ export default {
       details: [],
       status: {},
       selectedHour: '',
-      timeType: 'hour'
+      timeType: 'hour',
+      addtionParas: []
     }
   },
   methods: {
+    computeColorClass(text) {
+      if (text == '异常') {
+        return 'colorError'
+      } else if (text == '未接入' || text == '未配置' || text == '未录入') {
+        return 'colorWarn'
+      } else {
+        return ''
+      }
+      // return {
+      //   colorError: text == '异常',
+      //   colorWarn: text == '未接入' || text == '未配置' || text == '未录入'
+      // }
+    },
     selectMachine(sensor) {
       if (sensor.catalog == 'sensor') {
         let countSelected = 0
@@ -238,6 +253,33 @@ export default {
         app.hourDataMachine()
       });
     },
+    procStatuts(gw) {
+      this.status = {}
+      this.addtionParas = []
+      if (gw.Result.Alarm) {
+        this.status.alarm = gw.Result.Alarm._text
+      }
+      this.addtionParas.push({
+        title: '日龄',
+        description: formatErrMsg(gw.Result.Days._text),
+        style: this.computeColorClass(formatErrMsg(gw.Result.Days._text))
+      })
+      this.addtionParas.push({
+        title: '通风',
+        description: formatErrMsg(gw.Result.VLevel._text),
+        style: this.computeColorClass(formatErrMsg(gw.Result.VLevel._text))
+      })
+      this.addtionParas.push({
+        title: '模式',
+        description: this.getRunModeText(gw.Result.RunMode._text),
+        style: this.computeColorClass(this.getRunModeText(gw.Result.RunMode._text))
+      })
+      this.addtionParas.push({
+        title: '状态',
+        description: gw.Result.OnLine._text == 'Y' ? '在线' : '离线',
+        style: gw.Result.OnLine._text != 'Y' ? 'colorError' : ''
+      })
+    },
     async getInitData() {
       let gatewayId = wx.getStorageSync(CURRENT_GATEWAY)
       // console.log('getInitData', gatewayId)
@@ -248,26 +290,29 @@ export default {
       })
       let gw = await gatewayDetail({ gatewayId: gatewayId })
       console.log('gw', gw)
-      this.status = {}
-      this.status.days = formatErrMsg(gw.Result.Days._text)
-      this.status.online = gw.Result.OnLine._text == 'Y' ? '在线' : '离线'
-      if (gw.Result.Alarm) {
-        this.status.alarm = gw.Result.Alarm._text
-      }
-      this.status.vLevel = formatErrMsg(gw.Result.VLevel._text)
-      this.status.runMode = this.getRunModeText(gw.Result.RunMode._text)
+      this.procStatuts(gw)
       let details = []
       if (gw.Result.SensorDatas.Sensor) {
         for (let sensor of gw.Result.SensorDatas.Sensor) {
           for (let sensorConfig of cache.Sensors.Sensor) {
             if (sensorConfig._attributes.Id == sensor._attributes.Id) {
+              let tmpText = detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' })
               details.push({
                 isSelected: false,
                 catalog: 'sensor',
                 'name': sensorConfig._attributes.Name,
                 config: sensorConfig,
-                'value': detailValueFormat({ config: sensorConfig, item: sensor, catalog: 'sensor' })
+                'value': tmpText,
+                style: this.computeColorClass(tmpText)
               })
+              if (sensorConfig.Params && sensor.Params && sensorConfig.Params.Param._attributes.Code == sensor.Params.Param._attributes.Id) {
+                let tmpText = sensor.Params.Param._attributes.Val ? sensor.Params.Param._attributes.Val : '---'
+                this.addtionParas.push({
+                  title: sensorConfig.Params.Param._attributes.Name,
+                  description: tmpText,
+                  style: this.computeColorClass(tmpText)
+                })
+              }
               break
             }
           }
@@ -291,6 +336,9 @@ export default {
         }
       }
       this.details = details
+      // let tmpAddtionParas = this.addtionParas
+      // this.addtionParas = []
+      // this.addtionParas = tmpAddtionParas
     },
     getControlIcon({ config = {}, item = {} } = {}) {
       let dictory = '/static/images/breed/'
@@ -351,6 +399,7 @@ export default {
   width: 100%;
   text-align: center;
   font-size: 14px;
+  border-bottom: 1px solid #bbb;
 }
 
 
@@ -371,11 +420,10 @@ export default {
 
 .status {
   font-size: 14px;
-  padding: 0 0 5px;
+  padding: 2px 10px 2px 0px;
   float: left;
-  width: 48%;
-  background-color: #ddd;
-  border: 1px solid #f8f9fb;
+  width: 300rpx;
+  border-bottom: 1px solid #bbb;
 }
 
 .monitorSelected {
@@ -389,6 +437,7 @@ export default {
 
 .monitors {
   width: 100%;
+  padding-top: 8px;
   text-align: center;
   justify-content: center;
   align-items: center;
@@ -409,10 +458,33 @@ export default {
   font-size: 14px;
 }
 
+.container {
+  display: flex;
+  /*
+  flex-direction: column;
+  */
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
 .dataValue {
   font-weight: bold;
   font-size: 16px;
   color: #6E8B3D;
+}
+
+.colorGreen {
+  font-weight: bold;
+  color: #6E8B3D;
+}
+
+.colorWarn {
+  color: yellow
+}
+
+.colorError {
+  color: red
 }
 
 </style>

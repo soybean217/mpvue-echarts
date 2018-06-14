@@ -126,7 +126,7 @@ export default {
         }
       }
       let data = await getAlarmInfo()
-      this.normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', ''))
+      this.normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', '')).toFixed(0)
       if (data.Result.Alarm.Id) {
         console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
         data.Result.Alarm.Id = formatArray(data.Result.Alarm.Id)

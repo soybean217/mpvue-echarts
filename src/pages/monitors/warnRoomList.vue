@@ -1,9 +1,14 @@
 <template>
   <div class="container">
     <div class="wrap" v-for="(gateway,i1) in farmInfo.gateways" :key="gateway._attributes.Id" @click="toRoomDetail(gateway)">
-      <div class="left">
+      <div class="left green" v-if="gateway.details && gateway.details[0] != '设备离线'">
+        <img class="imgLeft" src='/static/images/home_green.png'>
+        <br>{{gateway._attributes.Name}}
+      </div>
+      <div class="left" v-else>
         <img class="imgLeft" src='/static/images/home.png'>
-        <br>{{gateway._attributes.Name}}</div>
+        <br>{{gateway._attributes.Name}}
+      </div>
       <div class="right">
         <div v-for="(detail,i2) in gateway.details" :key="i2">{{detail}}</div>
       </div>
@@ -103,9 +108,13 @@ export default {
   padding: 5px 10px;
 }
 
+.green {
+  color: #009944;
+}
+
 .wrap {
   width: 100%;
-  border-bottom: 1px solid #DBDBDB;
+  border-bottom: 1px solid #bbb;
   display: flex;
   justify-content: center;
   align-items: center;
