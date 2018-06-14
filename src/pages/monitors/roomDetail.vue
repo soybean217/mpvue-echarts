@@ -16,19 +16,28 @@
     <div class="status">
       状态：<span class="colorGreen" v-bind:class="">{{status.online.text}}</span>
     </div> -->
-    <div class="status" v-for="(para,i2) in addtionParas" :key='i2'>
-      {{para.title}}：<span class="colorGreen" v-bind:class="para.style">{{para.description}}</span>
+    <div class="addtionParasCss">
+      <div class="status" v-for="(para,i2) in addtionParas" :key='i2'>
+        {{para.title}}：<span class="colorGreen" v-bind:class="para.style">{{para.description}}</span>
+      </div>
     </div>
     <div class="monitors">
-      <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'><span class="dataTitle">{{detail.name}}</span>
-        <br><img v-if="detail.icon" class="imgIcon" :src="detail.icon" /><span v-else class="dataValue" v-bind:class="detail.style">{{detail.value}}</span></div>
+      <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'>
+        <div class="dataTitle">{{detail.name}}</div>
+        <div v-if="detail.icon" :style="'background:url('+detail.icon+');background-size: contain;'" class="imgIcon">
+          <!-- <div class="desc" v-if="isNumber(detail.value)">{{detail.value}}</div>
+          <div v-else></div> -->
+          <div class="desc">{{detail.value}}</div>
+        </div>
+        <div v-else class="dataValue" v-bind:class="detail.style">{{detail.value}}</div>
+      </div>
     </div>
   </div>
 </template>
 <script>
 import echarts from 'echarts'
 import mpvueEcharts from 'mpvue-echarts'
-import { gatewayDetail, detailValueFormat, hourData, minData, formatErrMsg } from '@/utils/api'
+import { gatewayDetail, detailValueFormat, hourData, minData, formatErrMsg, formatArray } from '@/utils/api'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
 
@@ -103,6 +112,10 @@ export default {
     }
   },
   methods: {
+    isNumber(n) {
+      console.log('isNumber', n, !isNaN(parseFloat(n)) && isFinite(n))
+      return !isNaN(parseFloat(n)) && isFinite(n)
+    },
     computeColorClass(text) {
       if (text == '异常') {
         return 'colorError'
@@ -289,7 +302,6 @@ export default {
         title: cache._attributes.Name
       })
       let gw = await gatewayDetail({ gatewayId: gatewayId })
-      console.log('gw', gw)
       this.procStatuts(gw)
       let details = []
       if (gw.Result.SensorDatas.Sensor) {
@@ -305,13 +317,22 @@ export default {
                 'value': tmpText,
                 style: this.computeColorClass(tmpText)
               })
-              if (sensorConfig.Params && sensor.Params && sensorConfig.Params.Param._attributes.Code == sensor.Params.Param._attributes.Id) {
-                let tmpText = sensor.Params.Param._attributes.Val ? sensor.Params.Param._attributes.Val : '---'
-                this.addtionParas.push({
-                  title: sensorConfig.Params.Param._attributes.Name,
-                  description: tmpText,
-                  style: this.computeColorClass(tmpText)
-                })
+              if (sensorConfig.Params && sensor.Params) {
+                sensorConfig.Params.Param = formatArray(sensorConfig.Params.Param)
+                sensor.Params.Param = formatArray(sensor.Params.Param)
+                for (let sc of sensorConfig.Params.Param) {
+                  for (let s of sensor.Params.Param) {
+                    if (sc._attributes.Code == s._attributes.Id) {
+                      let tmpText = s._attributes.Val ? s._attributes.Val : '---'
+                      this.addtionParas.push({
+                        title: sc._attributes.Name,
+                        description: tmpText,
+                        style: this.computeColorClass(tmpText)
+                      })
+                      break;
+                    }
+                  }
+                }
               }
               break
             }
@@ -342,22 +363,22 @@ export default {
     },
     getControlIcon({ config = {}, item = {} } = {}) {
       let dictory = '/static/images/breed/'
-      if (item._attributes.Degree.length > 0 && item._attributes.Degree != '0') {
-        return false
-      } else {
-        switch (item._attributes.Val) {
-          case '0':
-            return dictory + config._attributes.Type.toLowerCase() + '_forwardoff.png'
-          case '1':
-            return dictory + config._attributes.Type.toLowerCase() + '_forwardinhandon.png'
-          case '2':
-            return dictory + config._attributes.Type.toLowerCase() + '_forwardinhandon.png'
-          case '3':
-            return dictory + config._attributes.Type.toLowerCase() + '_forwarderror.png'
-          default:
-            return false
-        }
+      // if (item._attributes.Degree.length > 0 && item._attributes.Degree != '0') {
+      //   return false
+      // } else {
+      switch (item._attributes.Val) {
+        case '0':
+          return dictory + config._attributes.Type.toLowerCase() + '_forwardoff.png'
+        case '1':
+          return dictory + config._attributes.Type.toLowerCase() + '_forwardinhandon.png'
+        case '2':
+          return dictory + config._attributes.Type.toLowerCase() + '_forwardinhandon.png'
+        case '3':
+          return dictory + config._attributes.Type.toLowerCase() + '_forwarderror.png'
+        default:
+          return false
       }
+      // }
     },
     getRunModeText(mode) {
       switch (mode) {
@@ -408,6 +429,10 @@ export default {
   width: 24%;
   height: 60px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   padding: 30rpx 0;
   /*
   background-color: #DBDBDB;
@@ -418,12 +443,16 @@ export default {
   box-shadow: 2px 2px 5px #000;
 }
 
+.addtionParasCss {
+  width: 620rpx;
+}
+
 .status {
-  font-size: 14px;
-  padding: 2px 10px 2px 0px;
+  font-size: 30rpx;
+  padding: 2rpx 10rpx 2rpx 0;
   float: left;
   width: 300rpx;
-  border-bottom: 1px solid #bbb;
+  border-bottom: 1rpx solid #bbb;
 }
 
 .monitorSelected {
@@ -433,6 +462,20 @@ export default {
 .imgIcon {
   width: 40px;
   height: 40px;
+  background-size: contain;
+}
+
+.imgIcon .desc {
+  box-sizing: border-box;
+  color: rgb(172, 29, 16);
+  max-width: 100%;
+  overflow-wrap: break-word;
+  text-shadow: 2px 2px 10px rgb(0, 112, 192);
+  font-size: 12px;
+  float: right;
+  top: 10%;
+  right: 10%;
+  z-index: 1;
 }
 
 .monitors {
@@ -456,6 +499,8 @@ export default {
 
 .dataTitle {
   font-size: 14px;
+  width: 100%;
+  text-align: center;
 }
 
 .container {
@@ -480,7 +525,7 @@ export default {
 }
 
 .colorWarn {
-  color: yellow
+  color: #EF8200
 }
 
 .colorError {

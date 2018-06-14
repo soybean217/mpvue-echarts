@@ -49,7 +49,7 @@ export function formatArray(target) {
     return target
   } else {
     let result = []
-    result.push(tareget)
+    result.push(target)
     return result
   }
 }
@@ -166,13 +166,10 @@ function _matchErrMsg(val) {
   switch (val) {
     case -999:
       return '未接入'
-      break
     case -998:
       return '未配置'
-      break
     case -888:
       return '未录入'
-      break
     default:
       return '异常'
   }
@@ -231,13 +228,17 @@ function _formatController({ config = {}, item = {} } = {}) {
   } else {
     switch (item._attributes.Val) {
       case '0':
-        return '关'
+        // return '关'
+        return ''
       case '1':
-        return '正开'
+        // return '正开'
+        return ''
       case '2':
-        return '反开'
+        // return '反开'
+        return ''
       case '3':
-        return '错误'
+        // return '错误'
+        return ''
       default:
         return item._attributes.Val
     }
