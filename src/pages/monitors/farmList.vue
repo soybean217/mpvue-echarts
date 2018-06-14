@@ -96,6 +96,7 @@ export default {
       this.initParent()
     },
     procLeaveMark() {
+      this.childMapList = {}
       for (let i of this.farmData.Result.Farms.Farm) {
         let hasChild = false
         for (let j of this.farmData.Result.Farms.Farm) {

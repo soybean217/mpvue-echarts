@@ -364,6 +364,7 @@ export default {
   background-color: #fff;
   border: 1px solid #f8f9fb;
   border-radius: 25rpx;
+  box-shadow: 2px 2px 5px #000;
 }
 
 .status {
@@ -371,7 +372,7 @@ export default {
   padding: 0 0 5px;
   float: left;
   width: 48%;
-  background-color: #f3f3f3;
+  background-color: #ddd;
   border: 1px solid #f8f9fb;
 }
 

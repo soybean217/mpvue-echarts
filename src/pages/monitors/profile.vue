@@ -1,12 +1,12 @@
 <template>
   <div class="container">
-    <a class="wrap" href="login">
+    <a class="bigBtn" href="login">
       重新登录
     </a>
-    <a class="wrap" href="serverEdit">
+    <a class="bigBtn" href="serverEdit">
       设置服务器
     </a>
-    <span class="wrap" @click='logout'>
+    <span class="bigBtn" @click='logout'>
       注销
     </span>
   </div>
@@ -45,16 +45,6 @@ body {
   justify-content: center;
 }
 
-.wrap {
-  width: 80%;
-  display: inline-block;
-  margin: 10px auto;
-  padding: 5px 10px;
-  text-align: center;
-  color: blue;
-  border: 1px solid blue;
-  border-radius: 25rpx;
-}
 
 .container {
   height: 100%;

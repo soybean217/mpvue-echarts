@@ -18,8 +18,8 @@ export default {
   */
   display: flex;
   align-items: center;
-  background-color: #f8f9fb;
   /*
+  background-color: #f8f9fb;
   justify-content: space-between;
 */
   padding: 10rpx 0;
@@ -28,8 +28,41 @@ export default {
 }
 
 body {
-  background-color: #f8f9fb;
+  background-color: #f1f1f1;
 }
+
+.bigBtn
+ {
+  width: 80%;
+  display: inline-block;
+  margin: 10px auto;
+  padding: 5px 10px;
+  text-align: center;
+  color: black;
+  border: 1px solid #000;
+  border-radius: 25rpx;
+  box-shadow: 2px 2px 5px #000;
+}
+
+.smallBtn
+ {
+  display: inline-block;
+  margin: 10px auto;
+  padding: 5px 10px;
+  color: black;
+  border: 1px solid #000;
+  border-radius: 25rpx;
+  box-shadow: 2px 2px 5px #000;
+}
+
+.formControl {
+  display: block;
+  padding: 5px 12px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5rpx;
+}
+
 
 .roomWarn {
   background: red;

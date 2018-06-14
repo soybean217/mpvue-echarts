@@ -1,12 +1,12 @@
 <template>
   <div class="container">
     <form class="form-container">
-      <input type="text" class="form-control" v-model="username" placeholder="用户名" />
-      <input type="password" class="form-control" v-model="password" placeholder="密码" />
+      <input type="text" class="formControl" v-model="username" placeholder="用户名" />
+      <input type="password" class="formControl" v-model="password" placeholder="密码" />
     </form>
-    <span @click="login" class="counter">登录</span>
+    <span @click="login" class="smallBtn">登录</span>
     <br>
-    <a href='/pages/monitors/serverEdit' class="counter">修改服务器地址</a>
+    <a href='/pages/monitors/serverEdit' class="smallBtn">修改服务器地址</a>
   </div>
 </template>
 <script>
@@ -87,23 +87,6 @@ export default {
   justify-content: space-between;
   padding: 200rpx 0;
   box-sizing: border-box;
-}
-
-.form-control {
-  display: block;
-  padding: 5px 12px;
-  margin-bottom: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5rpx;
-}
-
-.counter {
-  display: inline-block;
-  margin: 10px auto;
-  padding: 5px 10px;
-  color: blue;
-  border: 1px solid blue;
-  border-radius: 25rpx;
 }
 
 </style>

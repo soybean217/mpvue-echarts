@@ -87,7 +87,8 @@ export default {
       onInit: initChart,
       remindCount: { "1": 0, "2": 0, "3": 0, "4": 0 },
       normalNumber: 0,
-      alartCount: 0
+      alartCount: 0,
+      needReload: false,
     }
   },
   methods: {
@@ -166,11 +167,15 @@ export default {
   },
   mounted() {
     // console.log('mounted')
-    // this.getInitData()
+    this.getInitData()
+    this.needReload = true
   },
   onShow() {
     console.log('onShow')
-    this.getInitData()
+    if (this.needReload) {
+      this.getInitData()
+    }
+
     // chartPie.on("mousedown", function(params) {
     //   console.log('mousedown', params)
     //   if (params.name == "异常栏舍") {

@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <form class="form-container">
-      <input type="text" class="form-control" v-model="serverHost" placeholder="服务器地址" />
+      <input type="text" class="formControl" v-model="serverHost" placeholder="服务器地址" />
     </form>
-    <span @click="modifyServer" class="counter">修改</span>
+    <span @click="modifyServer" class="smallBtn">修改</span>
   </div>
 </template>
 <script>
@@ -53,21 +53,6 @@ export default {
   justify-content: space-between;
   padding: 200rpx 0;
   box-sizing: border-box;
-}
-
-.form-control {
-  display: block;
-  padding: 0 12px;
-  margin-bottom: 5px;
-  border: 1px solid #ccc;
-}
-
-.counter {
-  display: inline-block;
-  margin: 10px auto;
-  padding: 5px 10px;
-  color: blue;
-  border: 1px solid blue;
 }
 
 </style>
