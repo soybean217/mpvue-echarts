@@ -1,6 +1,20 @@
 <template>
   <div class="container">
-    <a class="bigBtn" href="login">
+    <div class="profileArea">
+      <div class="lineArea" @click='goLogin'>
+        <div class='lineLeft'>重新登录</div>
+        <div class='lineRight'>></div>
+      </div>
+      <div class="lineArea" @click='goServerEdit'>
+        <div class='lineLeft'>设置服务器</div>
+        <div class='lineRight'>></div>
+      </div>
+      <div class="lineArea" @click='logout'>
+        <div class='lineLeft'>注销</div>
+        <div class='lineRight'>></div>
+      </div>
+    </div>
+    <!-- <a class="bigBtn" href="login">
       重新登录
     </a>
     <a class="bigBtn" href="serverEdit">
@@ -8,7 +22,7 @@
     </a>
     <span class="bigBtn" @click='logout'>
       注销
-    </span>
+    </span> -->
   </div>
 </template>
 <script>
@@ -19,6 +33,12 @@ export default {
     return {}
   },
   methods: {
+    goLogin() {
+      wx.navigateTo({ url: '/pages/monitors/login' })
+    },
+    goServerEdit() {
+      wx.navigateTo({ url: '/pages/monitors/serverEdit' })
+    },
     logout() {
       wx.setStorageSync(LAST_SUCCESS_LOGIN_INPUT, false)
       wx.setStorageSync(LAST_SUCCESS_LOGIN_TICKET, false)
@@ -38,6 +58,27 @@ export default {
 
 </script>
 <style scoped>
+.lineLeft {
+  float: left
+}
+
+.lineRight {
+  float: right
+}
+
+.lineArea {
+  background-color: #fff;
+  padding: 20px 20px 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1rpx solid #bbb;
+}
+
+.profileArea {
+  width: 100%;
+}
+
 body {
   background-color: #f8f9fb;
   display: flex;

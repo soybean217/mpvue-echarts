@@ -4,18 +4,6 @@
       <mpvue-echarts :echarts="echarts" :onInit="onInit" canvasId="detail-line" />
     </div>
     <div class="divFull" v-if="status.alarm"><span class="roomWarn">报警：{{status.alarm}}</span></div>
-    <!-- <div class="status">
-      日龄：<span class="colorGreen" v-bind:class="status.days.style?status.days.style:{}">{{status.days.text}}</span>
-    </div>
-    <div class="status">
-      通风：<span class="colorGreen" v-bind:class="">{{status.vLevel.text}}</span>
-    </div>
-    <div class="status">
-      模式：<span class="colorGreen" v-bind:class="">{{status.runMode.text}}</span>
-    </div>
-    <div class="status">
-      状态：<span class="colorGreen" v-bind:class="">{{status.online.text}}</span>
-    </div> -->
     <div class="addtionParasCss">
       <div class="status" v-for="(para,i2) in addtionParas" :key='i2'>
         {{para.title}}：<span class="colorGreen" v-bind:class="para.style">{{para.description}}</span>
@@ -25,8 +13,6 @@
       <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'>
         <div class="dataTitle">{{detail.name}}</div>
         <div v-if="detail.icon" :style="'background:url('+detail.icon+');background-size: contain;'" class="imgIcon">
-          <!-- <div class="desc" v-if="isNumber(detail.value)">{{detail.value}}</div>
-          <div v-else></div> -->
           <div class="desc">{{detail.value}}</div>
         </div>
         <div v-else class="dataValue" v-bind:class="detail.style">{{detail.value}}</div>
@@ -112,10 +98,6 @@ export default {
     }
   },
   methods: {
-    isNumber(n) {
-      console.log('isNumber', n, !isNaN(parseFloat(n)) && isFinite(n))
-      return !isNaN(parseFloat(n)) && isFinite(n)
-    },
     computeColorClass(text) {
       if (text == '异常') {
         return 'colorError'
@@ -124,10 +106,6 @@ export default {
       } else {
         return ''
       }
-      // return {
-      //   colorError: text == '异常',
-      //   colorWarn: text == '未接入' || text == '未配置' || text == '未录入'
-      // }
     },
     selectMachine(sensor) {
       if (sensor.catalog == 'sensor') {
@@ -302,8 +280,10 @@ export default {
         title: cache._attributes.Name
       })
       let gw = await gatewayDetail({ gatewayId: gatewayId })
+      console.log('gw', gw)
       this.procStatuts(gw)
       let details = []
+      let addtionParas = []
       if (gw.Result.SensorDatas.Sensor) {
         for (let sensor of gw.Result.SensorDatas.Sensor) {
           for (let sensorConfig of cache.Sensors.Sensor) {
@@ -324,10 +304,11 @@ export default {
                   for (let s of sensor.Params.Param) {
                     if (sc._attributes.Code == s._attributes.Id) {
                       let tmpText = s._attributes.Val ? s._attributes.Val : '---'
-                      this.addtionParas.push({
+                      addtionParas.push({
                         title: sc._attributes.Name,
                         description: tmpText,
-                        style: this.computeColorClass(tmpText)
+                        style: this.computeColorClass(tmpText),
+                        code: sc._attributes.Code
                       })
                       break;
                     }
@@ -356,10 +337,37 @@ export default {
           }
         }
       }
-      this.details = details
+      addtionParas.sort(function(a, b) {
+        return a.code - b.code
+      })
+      this.addtionParas = this.addtionParas.concat(addtionParas)
+      this.details = this.sortDetails(details)
+      if (Array.isArray(this.details) && this.details.length > 0) {
+        this.selectMachine(this.details[0])
+      }
       // let tmpAddtionParas = this.addtionParas
       // this.addtionParas = []
       // this.addtionParas = tmpAddtionParas
+    },
+    sortDetails(oriDetails) {
+      let result = []
+      let sortTypes = ['TEMPERATURE', 'HUMIDITY', 'CO2', 'AMMONIA', 'PRESSURE', 'ANEMOMETER', 'AIRFLOW', 'BRIGHTENESS', 'DRINK', 'AMMETER', 'FORAGE', 'EGG', 'DIE', 'PNUMBER', 'EAT', 'IVFAN', 'FREQUENCY', 'FAN', 'WCURTAIN', 'CURTAIN', 'LIGHT', 'HEAT', 'SPRAYER', 'FDFUNNEL', 'FEED', 'SCRAPER']
+      for (let type of sortTypes) {
+        let tmpArr = []
+        for (let detail of oriDetails) {
+          if (detail.config._attributes.Type == type) {
+            tmpArr.push(detail)
+          }
+        }
+        tmpArr.sort(function(a, b) {
+          return a.name - b.name
+        })
+        result = result.concat(tmpArr)
+      }
+      if (result.length != oriDetails.length) {
+        console.log('error sortDetails is not match', result, oriDetails)
+      }
+      return result
     },
     getControlIcon({ config = {}, item = {} } = {}) {
       let dictory = '/static/images/breed/'
@@ -419,7 +427,8 @@ export default {
 .divFull {
   width: 100%;
   text-align: center;
-  font-size: 14px;
+  font-size: 20px;
+  font-weight: bold;
   border-bottom: 1px solid #bbb;
 }
 

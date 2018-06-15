@@ -73,6 +73,9 @@ export default {
     if (cache) {
       this.username = cache.userName
       this.password = cache.password
+    } else {
+      this.username = ''
+      this.password = ''
     }
   }
 }

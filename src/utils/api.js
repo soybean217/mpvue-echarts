@@ -30,16 +30,12 @@ export function getWarnTypeNameById(typeId) {
   switch (typeId) {
     case '1':
       return '栏舍警报'
-      break
     case '2':
       return '日常事务'
-      break
     case '3':
       return '设备到期'
-      break
     case '4':
       return '参数修改'
-      break
     default:
       return '未定义'
   }
@@ -183,37 +179,26 @@ function _formatSensor({ config = {}, item = {} } = {}) {
     switch (config._attributes.Type) {
       case 'TEMPERATURE':
         return item._attributes.Val + ' ℃'
-        break
       case 'HUMIDITY':
         return item._attributes.Val + ' %'
-        break
       case 'AMMONIA':
         return item._attributes.Val + ' ppm'
-        break
       case 'BRIGHTENESS':
         return item._attributes.Val + ' lx'
-        break
       case 'DRINK':
         return item._attributes.Val + ' kg'
-        break
       case 'FORAGE':
         return item._attributes.Val + ' kg'
-        break
       case 'AMMETER':
         return item._attributes.Val + ' kw.h'
-        break
       case 'CO2':
         return item._attributes.Val + ' ppm'
-        break
       case 'ANEMOMETER':
         return item._attributes.Val + ' m/s'
-        break
       case 'PRESSURE':
         return item._attributes.Val + ' pa'
-        break
       case 'AIRFLOW':
         return item._attributes.Val + ' m3/h'
-        break
       default:
         return item._attributes.Val
     }

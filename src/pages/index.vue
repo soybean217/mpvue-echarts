@@ -199,6 +199,7 @@ export default {
   width: 100%;
   text-align: center;
   font-size: 20px;
+  font-weight: bold;
   padding-bottom: 5px;
 }
 
