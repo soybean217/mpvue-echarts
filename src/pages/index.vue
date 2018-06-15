@@ -125,13 +125,12 @@ export default {
           this.remindCount[info.remind_type._text] = 1
         }
       }
+      this.alartCount = 0
       let data = await getAlarmInfo()
       this.normalNumber = Number(data.Result.Alarm._attributes.rate.replace('%', '')).toFixed(0)
       if (data.Result.Alarm.Id) {
-        console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
         data.Result.Alarm.Id = formatArray(data.Result.Alarm.Id)
         this.alartCount = data.Result.Alarm.Id.length
-        console.log('data.Result.Alarm.Id', data.Result.Alarm.Id)
         if (Array.isArray(data.Result.Alarm.Id)) {
           for (let gateway of data.Result.Alarm.Id) {
             gateway._attributes = {}

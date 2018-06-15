@@ -17,7 +17,7 @@
 </template>
 <script>
 import { getStorage, setStorage } from '@/utils/wechat'
-import { syncGatewaysConfig, gatewayDetail, redirectToRoomDetail, detailValueFormat } from '@/utils/api'
+import { syncGatewaysConfig, gatewayDetail, redirectToRoomDetail, detailValueFormat, formatArray } from '@/utils/api'
 const GATEWAY_LIST_FOR_LAST_FARM = 'GATEWAY_LIST_FOR_LAST_FARM'
 const GATEWAY_CONFIG_PREFIX = 'GC_'
 const CURRENT_GATEWAY = 'CURRENT_GATEWAY'
@@ -50,6 +50,7 @@ export default {
         let gw = await gatewayDetail({ gatewayId: gateway._attributes.Id })
         if (gw.Result.OnLine._text == 'Y') {
           let tmpCount = 0
+          gw.Result.SensorDatas.Sensor = formatArray(gw.Result.SensorDatas.Sensor)
           for (let sensor of gw.Result.SensorDatas.Sensor) {
             if (tmpCount >= DETAIL_LIMIT) {
               break

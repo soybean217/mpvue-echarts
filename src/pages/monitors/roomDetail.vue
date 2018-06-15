@@ -12,7 +12,9 @@
     <div class="monitors">
       <div class="monitor" v-bind:class="{ monitorSelected: detail.isSelected }" v-for="(detail,i1) in details" :key='i1' @click='selectMachine(detail)'>
         <div class="dataTitle">{{detail.name}}</div>
-        <div v-if="detail.icon" :style="'background:url('+detail.icon+');background-size: contain;'" class="imgIcon">
+        <!-- <div v-if="detail.icon" :style="'background:url('+detail.icon+');background-size: contain;'" class="imgIcon"> -->
+        <div v-if="detail.icon" class="imgIconDiv">
+          <img :src='detail.icon' class="imgIcon" />
           <div class="desc">{{detail.value}}</div>
         </div>
         <div v-else class="dataValue" v-bind:class="detail.style">{{detail.value}}</div>
@@ -285,6 +287,7 @@ export default {
       let details = []
       let addtionParas = []
       if (gw.Result.SensorDatas.Sensor) {
+        gw.Result.SensorDatas.Sensor = formatArray(gw.Result.SensorDatas.Sensor)
         for (let sensor of gw.Result.SensorDatas.Sensor) {
           for (let sensorConfig of cache.Sensors.Sensor) {
             if (sensorConfig._attributes.Id == sensor._attributes.Id) {
@@ -321,6 +324,7 @@ export default {
         }
       }
       if (gw.Result.ControllerDatas.Controller) {
+        gw.Result.ControllerDatas.Controller = formatArray(gw.Result.ControllerDatas.Controller)
         for (var item of gw.Result.ControllerDatas.Controller) {
           for (let config of cache.Controllers.Controller) {
             if (config._attributes.Id == item._attributes.Id) {
@@ -360,7 +364,7 @@ export default {
           }
         }
         tmpArr.sort(function(a, b) {
-          return a.name - b.name
+          return a.name.localeCompare(b.name)
         })
         result = result.concat(tmpArr)
       }
@@ -471,10 +475,15 @@ export default {
 .imgIcon {
   width: 40px;
   height: 40px;
-  background-size: contain;
 }
 
-.imgIcon .desc {
+.imgIconDiv {
+  width: 40px;
+  height: 40px;
+}
+
+.imgIconDiv .desc {
+  position: relative;
   box-sizing: border-box;
   color: rgb(172, 29, 16);
   max-width: 100%;
@@ -482,9 +491,9 @@ export default {
   text-shadow: 2px 2px 10px rgb(0, 112, 192);
   font-size: 12px;
   float: right;
-  top: 10%;
+  top: -40px;
   right: 10%;
-  z-index: 1;
+  z-index: 10;
 }
 
 .monitors {
