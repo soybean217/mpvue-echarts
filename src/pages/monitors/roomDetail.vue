@@ -15,7 +15,8 @@
         <!-- <div v-if="detail.icon" :style="'background:url('+detail.icon+');background-size: contain;'" class="imgIcon"> -->
         <div v-if="detail.icon" class="imgIconDiv">
           <img :src='detail.icon' class="imgIcon" />
-          <div class="desc">{{detail.value}}</div>
+          <!-- <div class="desc">{{detail.value}}</div> -->
+          <span class="smallByIcon">{{detail.value}}</span>
         </div>
         <div v-else class="dataValue" v-bind:class="detail.style">{{detail.value}}</div>
       </div>
@@ -54,6 +55,7 @@ function initChart(canvas, width, height) {
     grid: {
       containLabel: true
     },
+    animation: false,
     xAxis: {
       type: 'category',
       boundaryGap: false,
@@ -162,24 +164,43 @@ export default {
     async hourDataMachine() {
       option.legend.data = []
       option.series = []
+      let needInitial = true
       for (let sensor of this.details) {
         if (sensor.isSelected) {
           // console.log('hourDataMachine sensor', sensor)
           let data = await hourData({ machineId: sensor.config._attributes.Id })
           let chartData = this.procChartData(data.Result.Datas._text)
           option.legend.data.push(sensor.name)
-          option.xAxis = {
-            type: 'category',
-            boundaryGap: false,
-            data: chartData.categories
-          }
+
           option.series.push({
             name: sensor.name,
             type: 'line',
-            symbolSize: 16,
             smooth: true,
             data: chartData.data
           })
+          if (needInitial) {
+            option.xAxis = {
+              type: 'category',
+              boundaryGap: false,
+              data: chartData.categories
+            }
+            if (chartData.categories.length > 0) {
+              let ringArray = []
+              for (let ring of chartData.categories) {
+                ringArray.push(0)
+              }
+              option.series.push({
+                name: '',
+                type: 'line',
+                lineStyle: {
+                  width: 0
+                },
+                symbolSize: 16,
+                data: ringArray
+              })
+            }
+            needInitial = false
+          }
         }
       }
       option.title = {
@@ -206,24 +227,42 @@ export default {
     async minDataMachine() {
       option.legend.data = []
       option.series = []
+      let needInitial = true
       // console.log('this.details', this.details)
       for (let sensor of this.details) {
         if (sensor.isSelected) {
           let data = await minData({ machineId: sensor.config._attributes.Id, hour: this.selectedHour })
           let chartData = this.procChartData(data.Result.Datas._text)
           option.legend.data.push(sensor.name)
-          option.xAxis = {
-            type: 'category',
-            boundaryGap: false,
-            data: chartData.categories
-          }
           option.series.push({
             name: sensor.name,
             type: 'line',
-            symbolSize: 16,
             smooth: true,
             data: chartData.data
           })
+          if (needInitial) {
+            option.xAxis = {
+              type: 'category',
+              boundaryGap: false,
+              data: chartData.categories
+            }
+            if (chartData.categories.length > 0) {
+              let ringArray = []
+              for (let ring of chartData.categories) {
+                ringArray.push(0)
+              }
+              option.series.push({
+                name: '',
+                type: 'line',
+                lineStyle: {
+                  width: 0
+                },
+                symbolSize: 16,
+                data: ringArray
+              })
+            }
+            needInitial = false
+          }
         }
       }
       // console.log('chartData', chartData)
@@ -478,22 +517,33 @@ export default {
 }
 
 .imgIconDiv {
-  width: 40px;
+  width: 100%;
   height: 40px;
+  float: left;
 }
 
 .imgIconDiv .desc {
+  /*
   position: relative;
+  top: -20px;
+  */
+  float: left;
   box-sizing: border-box;
   color: rgb(172, 29, 16);
   max-width: 100%;
+  width: 15px;
+  height: 40px;
   overflow-wrap: break-word;
   text-shadow: 2px 2px 10px rgb(0, 112, 192);
   font-size: 12px;
   float: right;
-  top: -40px;
   right: 10%;
   z-index: 10;
+}
+
+.smallByIcon {
+  font-size: 12px;
+  text-shadow: 2px 2px 10px rgb(0, 112, 192);
 }
 
 .monitors {

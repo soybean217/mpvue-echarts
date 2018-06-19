@@ -208,7 +208,7 @@ function _formatSensor({ config = {}, item = {} } = {}) {
 }
 
 function _formatController({ config = {}, item = {} } = {}) {
-  if (item._attributes.Degree.length > 0 && item._attributes.Degree != '0') {
+  if (item._attributes.Degree.length > 0) {
     return item._attributes.Degree
   } else {
     switch (item._attributes.Val) {
